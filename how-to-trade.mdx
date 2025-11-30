@@ -1,0 +1,47 @@
+---
+title: How to Trade
+description: 'Learn how to trade on decision markets on Combinator'
+---
+
+This section explains how to trade on traditional (non-quantum) decision markets on Combinator.
+
+## Getting Started
+
+Each user gets a client-side wallet to execute trades and hold positions with. Once you log in, you should be able to access your wallet in the top-right of the header. From there, you can either add funds by sending your desired token to the address.
+
+## Enter a Market
+
+In order to participate in a decision market, you need to enter a market with either SOL or the target token. In this walkthrough, we will give examples using `$ZC`, ZCombinator's native token, and `$SOL`.
+
+- Entering a market with 100 `ZC` splits your token into 100 `pass-ZC` and 100 `fail-ZC`
+- Entering a market with 2 `SOL` splits your token into 2 `pass-SOL` and 2 `fail-SOL`
+
+## Trading
+
+The Combinator frontend allows you to first choose whether you'd like to bet on the pass market or the fail market.
+
+The **pass market** represents the price of `$ZC` if a proposal passes. The **fail market** represents the price of `$ZC` if a proposal fails to pass.
+
+Trading on the pass market allows you to exchange `pass-ZC` for `pass-SOL` and vice versa. This will only affect the pass market `$ZC` price.
+
+Trading on the fail market allows you to exchange `fail-ZC` for `fail-SOL` and vice versa. This will only affect the fail market `$ZC` price.
+
+This allows you to express your belief on what you think the price of `$ZC` should be if a `ZC`-related proposal passes or fails.
+
+## Exiting a Market
+
+If you have sufficient `ZC` or `SOL` on both the pass and fail markets, you're able to combine the tokens and exit the market.
+
+### What does that mean?
+
+Let's say you have 100 `pass-ZC` and 80 `fail-ZC`. You're able to withdraw 80 `$ZC` from the market. Afterwards you will be left with 80 `$ZC` (in your privy wallet), 0 `pass-ZC` and 20 `fail-ZC`.
+
+This also applies to `SOL`.
+
+## Claiming
+
+After the decision market resolves, you will be able to claim tokens from the resolving market.
+
+Let's say a proposal ended up failing and you have 50 `pass-ZC` and 75 `fail-ZC` as well as 2 `pass-SOL` and 1 `fail-SOL`.
+
+This means you will be able to claim 75 `ZC` and 1 `SOL` from the fail market. The pass market tokens are deemed worthless / non claimable.

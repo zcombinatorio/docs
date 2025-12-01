@@ -1,0 +1,271 @@
+---
+title: "Create ICO Sale"
+description: "POST /ico/create - Create a new ICO sale for a token"
+---
+
+## Overview
+
+Creates a new ICO sale for a token. This generates an escrow account that will hold tokens during the sale and facilitates purchases and claims.
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://api.zcombinator.io/ico/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "creatorWallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "tokenMetadataUrl": "https://arweave.net/abc123",
+    "totalTokensForSale": "1000000000000000",
+    "tokenPriceSol": "0.00002",
+    "vaultTokenAccount": "4kxNBzd7p9qE7V8L...",
+    "treasuryWallet": "8mxCBzd7p9qE7V8L...",
+    "treasurySolAmount": "1000000000"
+  }'
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/ico/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    tokenAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    creatorWallet: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    tokenMetadataUrl: "https://arweave.net/abc123",
+    totalTokensForSale: "1000000000000000",
+    tokenPriceSol: "0.00002",
+    vaultTokenAccount: "4kxNBzd7p9qE7V8L...",
+    treasuryWallet: "8mxCBzd7p9qE7V8L...",
+    treasurySolAmount: "1000000000"
+  })
+});
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+data = {
+    "tokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "creatorWallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "tokenMetadataUrl": "https://arweave.net/abc123",
+    "totalTokensForSale": "1000000000000000",
+    "tokenPriceSol": "0.00002",
+    "vaultTokenAccount": "4kxNBzd7p9qE7V8L...",
+    "treasuryWallet": "8mxCBzd7p9qE7V8L...",
+    "treasurySolAmount": "1000000000"
+}
+
+response = requests.post(
+    'https://api.zcombinator.io/ico/create',
+    json=data,
+    headers={'Content-Type': 'application/json'}
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField body="tokenAddress" type="string" required>
+  The Solana token mint address for the ICO
+</ParamField>
+
+<ParamField body="creatorWallet" type="string" required>
+  The wallet address of the ICO creator
+</ParamField>
+
+<ParamField body="tokenMetadataUrl" type="string" required>
+  URL to the token's metadata JSON (e.g., Arweave or IPFS)
+</ParamField>
+
+<ParamField body="totalTokensForSale" type="string" required>
+  Total number of tokens to sell in the ICO (as string for large numbers)
+</ParamField>
+
+<ParamField body="tokenPriceSol" type="string" required>
+  Price per token in SOL (decimal string, e.g., "0.00002")
+</ParamField>
+
+<ParamField body="vaultTokenAccount" type="string" required>
+  Token account where 50% of purchased tokens will be sent
+</ParamField>
+
+<ParamField body="treasuryWallet" type="string" required>
+  Wallet address to receive SOL from purchases
+</ParamField>
+
+<ParamField body="treasurySolAmount" type="string" required>
+  Amount of SOL allocated for treasury in lamports
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the ICO was created successfully
+</ResponseField>
+
+<ResponseField name="icoSale" type="object">
+  The created ICO sale object (see fields in [Get ICO Sale Info](/api-reference/ico/sale-info))
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "icoSale": {
+    "id": 1,
+    "token_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "creator_wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "escrow_pub_key": "7nxQB6p4qE7V8L5mD...",
+    "token_metadata_url": "https://arweave.net/abc123",
+    "total_tokens_for_sale": "1000000000000000",
+    "tokens_sold": "0",
+    "total_sol_raised": "0",
+    "token_price_sol": "0.00002",
+    "vault_token_account": "4kxNBzd7p9qE7V8L...",
+    "treasury_wallet": "8mxCBzd7p9qE7V8L...",
+    "treasury_sol_amount": "1000000000",
+    "status": "active",
+    "created_at": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing Required Fields">
+    ```json
+    {
+      "error": "Missing required fields"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Token Address">
+    ```json
+    {
+      "error": "Invalid token address format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Creator Wallet">
+    ```json
+    {
+      "error": "Invalid creator wallet address format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Vault Token Account">
+    ```json
+    {
+      "error": "Invalid vault token account address format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Treasury Wallet">
+    ```json
+    {
+      "error": "Invalid treasury wallet address format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Treasury Amount">
+    ```json
+    {
+      "error": "Invalid treasury SOL amount"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Metadata URL">
+    ```json
+    {
+      "error": "Invalid token metadata URL format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Token Price">
+    ```json
+    {
+      "error": "Invalid token price format (must be a decimal string)"
+    }
+    ```
+
+    Or:
+
+    ```json
+    {
+      "error": "Token price must be greater than 0"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Total Tokens">
+    ```json
+    {
+      "error": "Invalid total tokens for sale format"
+    }
+    ```
+
+    Or:
+
+    ```json
+    {
+      "error": "Total tokens for sale must be greater than 0"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="500 - Server Error">
+    ```json
+    {
+      "error": "Failed to create ICO sale"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Token Distribution Flow
+
+When an ICO is created, tokens are distributed as follows during purchases:
+
+<Steps>
+<Step title="User Purchases Tokens">
+User sends SOL to purchase tokens during the active sale period
+</Step>
+
+<Step title="50% to Vault">
+Half of the purchased tokens are immediately transferred to the vault token account
+</Step>
+
+<Step title="50% to Escrow">
+The remaining half stays in escrow for the user to claim after the sale is finalized
+</Step>
+</Steps>
+
+## Rate Limiting
+
+This endpoint is subject to rate limiting:
+- **30 requests per IP** per 1-minute window
+- Returns HTTP 429 when limit exceeded
+
+## Next Steps
+
+After creating an ICO:
+
+1. **Fund the escrow**: Transfer tokens to the escrow account
+2. **Share the ICO**: Users can purchase at [Purchase Prepare](/api-reference/ico/purchase-prepare)
+3. **Monitor progress**: Check sale stats with [Get ICO Sale Info](/api-reference/ico/sale-info)

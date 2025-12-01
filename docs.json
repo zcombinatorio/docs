@@ -69,6 +69,19 @@
               "api-reference/damm-liquidity/withdraw-build",
               "api-reference/damm-liquidity/withdraw-confirm"
             ]
+          },
+          {
+            "group": "ICO Sales",
+            "pages": [
+              "api-reference/ico/sale-info",
+              "api-reference/ico/create",
+              "api-reference/ico/purchase-history",
+              "api-reference/ico/purchase-prepare",
+              "api-reference/ico/purchase-confirm",
+              "api-reference/ico/claim-info",
+              "api-reference/ico/claim-prepare",
+              "api-reference/ico/claim-confirm"
+            ]
           }
         ]
       }

@@ -1,0 +1,250 @@
+---
+title: "Prepare Claim Transaction"
+description: "POST /ico/:tokenAddress/claim/prepare - Prepare an unsigned claim transaction"
+---
+
+## Overview
+
+Prepares an unsigned transaction for claiming tokens from escrow after an ICO sale is finalized. The user must sign this transaction with their wallet, then submit it to the [Confirm Claim](/api-reference/ico/claim-confirm) endpoint.
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.zcombinator.io/ico/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/claim/prepare" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+  }'
+```
+
+```javascript fetch
+const tokenAddress = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+const response = await fetch(
+  `https://api.zcombinator.io/ico/${tokenAddress}/claim/prepare`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      wallet: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+    })
+  }
+);
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+
+data = {
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+}
+
+response = requests.post(
+    f'https://api.zcombinator.io/ico/{token_address}/claim/prepare',
+    json=data,
+    headers={'Content-Type': 'application/json'}
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## URL Parameters
+
+<ParamField path="tokenAddress" type="string" required>
+  The Solana token mint address of the ICO
+</ParamField>
+
+## Request Parameters
+
+<ParamField body="wallet" type="string" required>
+  Base58 encoded public key of the wallet claiming tokens
+</ParamField>
+
+## Response
+
+<ResponseField name="transaction" type="string">
+  Base64 encoded unsigned transaction for the user to sign
+</ResponseField>
+
+<ResponseField name="requestId" type="string">
+  Unique identifier for this claim request (required for confirmation)
+</ResponseField>
+
+<ResponseField name="icoSaleId" type="number">
+  ID of the ICO sale
+</ResponseField>
+
+<ResponseField name="tokensToClaim" type="string">
+  Number of tokens that will be claimed
+</ResponseField>
+
+<ResponseField name="escrowPubKey" type="string">
+  Public key of the escrow account holding the tokens
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "transaction": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEDAhQn...",
+  "requestId": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "icoSaleId": 1,
+  "tokensToClaim": "25000000000000",
+  "escrowPubKey": "7nxQB6p4qE7V8L5mD..."
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing Wallet">
+    ```json
+    {
+      "error": "Wallet address is required"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Token Address">
+    ```json
+    {
+      "error": "Invalid token address format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Wallet Address">
+    ```json
+    {
+      "error": "Invalid wallet address format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="500 - Server Error">
+    ```json
+    {
+      "error": "Failed to prepare claim"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Claim Flow
+
+<Steps>
+<Step title="Check Claim Info">
+Call [Get Claim Info](/api-reference/ico/claim-info) to verify claimable balance
+</Step>
+
+<Step title="Prepare Transaction">
+Call this endpoint to get an unsigned claim transaction
+</Step>
+
+<Step title="User Signs">
+Present the transaction to the user's wallet for signing
+</Step>
+
+<Step title="Confirm Claim">
+Submit the signed transaction to [Confirm Claim](/api-reference/ico/claim-confirm) with the `requestId`
+</Step>
+
+<Step title="Transaction Submitted">
+Server adds escrow signature and submits to blockchain
+</Step>
+</Steps>
+
+## Prerequisites
+
+<Warning>
+**Sale Must Be Finalized**: Claims are only allowed when the ICO sale status is `finalized`. This endpoint will fail if the sale is still `active`.
+</Warning>
+
+Check the sale status first:
+
+```javascript
+const saleInfo = await fetch(`https://api.zcombinator.io/ico/${tokenAddress}`);
+const { status } = await saleInfo.json();
+
+if (status !== 'finalized') {
+  console.log('Claims not yet available - sale still active');
+  return;
+}
+```
+
+## Request Expiration
+
+<Note>
+The `requestId` expires after **10 minutes**. If the user doesn't sign and confirm within this window, they must call this endpoint again to get a fresh transaction.
+</Note>
+
+## Rate Limiting
+
+This endpoint is subject to rate limiting:
+- **30 requests per IP** per 1-minute window
+- Returns HTTP 429 when limit exceeded
+
+## Integration Example
+
+```javascript
+// 1. Check if user has claimable tokens
+const claimInfoResponse = await fetch(
+  `https://api.zcombinator.io/ico/${tokenAddress}/claim?wallet=${walletPublicKey}`
+);
+const claimInfo = await claimInfoResponse.json();
+
+const remainingToClaim =
+  BigInt(claimInfo.tokens_claimable) - BigInt(claimInfo.tokens_claimed);
+
+if (remainingToClaim <= 0n) {
+  console.log('No tokens to claim');
+  return;
+}
+
+// 2. Prepare the claim transaction
+const prepareResponse = await fetch(
+  `https://api.zcombinator.io/ico/${tokenAddress}/claim/prepare`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wallet: walletPublicKey.toBase58()
+    })
+  }
+);
+const { transaction, requestId } = await prepareResponse.json();
+
+// 3. Decode and sign the transaction
+const txBuffer = Buffer.from(transaction, 'base64');
+const tx = VersionedTransaction.deserialize(txBuffer);
+const signedTx = await wallet.signTransaction(tx);
+
+// 4. Confirm the claim
+const confirmResponse = await fetch(
+  `https://api.zcombinator.io/ico/${tokenAddress}/claim/confirm`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      signedTransaction: Buffer.from(signedTx.serialize()).toString('base64'),
+      requestId
+    })
+  }
+);
+```
+
+## Next Steps
+
+After preparing a claim:
+
+1. **Sign transaction**: Have user sign with their wallet
+2. **Confirm claim**: [Confirm Claim](/api-reference/ico/claim-confirm)
+3. **Check updated balance**: [Get Claim Info](/api-reference/ico/claim-info)

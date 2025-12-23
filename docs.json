@@ -63,12 +63,19 @@
             ]
           },
           {
-            "group": "Manage AMM Liquidity",
+            "group": "Manage DAMM Liquidity",
             "pages": [
               "api-reference/damm-liquidity/deposit-build",
               "api-reference/damm-liquidity/deposit-confirm",
               "api-reference/damm-liquidity/withdraw-build",
               "api-reference/damm-liquidity/withdraw-confirm"
+            ]
+          },
+          {
+            "group": "Manage DLMM Liquidity",
+            "pages": [
+              "api-reference/dlmm-liquidity/withdraw-build",
+              "api-reference/dlmm-liquidity/withdraw-confirm"
             ]
           },
           {

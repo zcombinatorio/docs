@@ -56,7 +56,7 @@ result = response.json()
 ## Request Parameters
 
 <ParamField body="withdrawalPercentage" type="number" required>
-  Percentage of unlocked liquidity to withdraw (`0 < value <= 15`). For example, `12.5` withdraws 12.5% of available liquidity. **Maximum 15% to prevent excessive liquidity removal.**
+  Percentage of unlocked liquidity to withdraw (`0 < value <= 50`). For example, `12.5` withdraws 12.5% of available liquidity.
 </ParamField>
 
 ## Response
@@ -137,11 +137,11 @@ result = response.json()
   <Accordion title="400 - Invalid Withdrawal Percentage">
     ```json
     {
-      "error": "withdrawalPercentage must be a number between 0 and 15"
+      "error": "withdrawalPercentage must be a number between 0 and 50"
     }
     ```
 
-    The withdrawal percentage must be greater than 0 and not exceed 15.
+    The withdrawal percentage must be greater than 0 and not exceed 50.
   </Accordion>
 
   <Accordion title="404 - No Positions Found">
@@ -173,7 +173,7 @@ result = response.json()
 
 <Steps>
 <Step title="Validate Parameters">
-Ensures withdrawalPercentage is between 0 and 15
+Ensures withdrawalPercentage is between 0 and 50
 </Step>
 
 <Step title="Fetch Pool State">

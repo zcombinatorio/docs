@@ -1,0 +1,167 @@
+---
+title: "Staking"
+---
+
+## Executive Summary
+
+\$ZC acts as a **Network Work Token**. It is a license to contribute value to and capture value from the Combinator Quantum Markets infrastructure. The protocol utilizes a novel "Quantum Justice" system where market sentiment determines Staker obligations adherence.
+
+| Parameter | Value |
+| :--- | :--- |
+| **Fixed Staking Period** | 2 Weeks (1,209,600 seconds) |
+| **Real Yield Architecture** | Yield is derived from trading fees and slashing. |
+| **Slashing Compliance** | Malicious or inactive stakers are slashed via community-driven Quantum Markets |
+
+---
+
+## The Social Contract: Stake-to-Earn & The Obligation
+
+Staking \$ZC is not a passive income strategy; it is a **paid role** within the ecosystem. By staking, you enter a social contract with the protocol:
+
+<CardGroup cols={2}>
+  <Card title="The Reward (Yield)" icon="gift">
+    Stakers earn a share of all protocol revenue (trading fees) and 100% of assets seized from slashed participants.
+  </Card>
+  <Card title="The Obligation (The Job)" icon="briefcase">
+    To justify this yield, stakers are mandated to actively contribute to the network's vitality.
+  </Card>
+</CardGroup>
+
+**Staker Obligations include:**
+
+- Regularly proposing high-quality Quantum Markets (for driving token price up and product adoption)
+- Actively trading in good faith across live markets (to deepen liquidity and reveal correct decisions)
+- Supporting both Combinator and Combinator-affiliated projects running Quantum Markets
+
+<Note>
+Obligations are intentionally qualitative, not rigid. How much emphasis a staker places on trading versus proposing markets and the degree of participation will shift based on the protocol's current needs—determined and enforced by the community through the process below.
+</Note>
+
+---
+
+## Policing & Enforcement ("Quantum Justice")
+
+Adherence to this obligation is not measured by rigid code, but by **peer consensus validated via Quantum Markets**. The community polices itself through the following process:
+
+<Steps>
+  <Step title="Accusation">
+    Any user can flag a staker who is "slacking" (collecting yield without contributing) or acting maliciously by proposing they be slashed at https://combinator.trade/zc/create.
+  </Step>
+  <Step title="QM Activation">
+    The Combinator Team reviews the proposal and launches a specific Quantum Market (e.g., "How much should we slash Staker [wallet]?").
+  </Step>
+  <Step title="The Verdict">
+    The market actively trades, allowing the community to price the probability and magnitude of the user's guilt based on their on-chain history.
+  </Step>
+  <Step title="Execution">
+    If the market resolves to a positive slash amount (e.g., "Yes, Slash 20%"), the smart contract automatically seizes that portion of the user's staked position and redistributes it to the remaining compliant stakers as yield.
+  </Step>
+</Steps>
+
+---
+
+## Mathematical Models & Accounting
+
+### The "Rain Gauge" Yield Drip Mechanism
+
+To prevent reward manipulation, yield is not injected instantly. It is "drip-fed" over the 2-week staking window.
+
+**Distribution Formula:**
+
+Every second, the vault releases rewards into the primary pool:
+
+$$
+Drip_{sec} = \lfloor \frac{Queued}{Window} \rfloor + \text{remainder\_adjustment}
+$$
+
+<AccordionGroup>
+  <Accordion title="Drip Precision" icon="droplet">
+    Our model ensures 100% of tokens are distributed. If `Queued % Window != 0`, the remainder is distributed +1 unit per second for the first R seconds of the stream.
+  </Accordion>
+  <Accordion title="Live Share Price" icon="chart-line">
+    Since the price updates every second:
+
+    $$
+    Price = \frac{TotalAssets + MaturedRewards}{TotalShares}
+    $$
+  </Accordion>
+</AccordionGroup>
+
+### Yield Calculation (Your Share)
+
+Your earning power is strictly pro-rata. There are no complex multipliers.
+
+$$
+Earning\_Rate = \frac{UserShares}{TotalShares} \times GlobalRewardRate
+$$
+
+### Slashing Mechanics
+
+When a staker is slashed, the value is returned to the compliant pool in two ways:
+
+<CardGroup cols={2}>
+  <Card title="Active Slash" icon="bolt">
+    If an active staker's shares are burned:
+    - `TotalShares` decreases
+    - `TotalAssets` remains unchanged
+    - **Impact**: The share price for every remaining staker jumps instantly
+
+    $$
+    \Delta Price = \frac{TotalAssets}{TotalShares_{new}} - \frac{TotalAssets}{TotalShares_{old}}
+    $$
+  </Card>
+  <Card title="Unbonding Slash" icon="clock">
+    If a user is slashed while in the unbonding period:
+    - Their tokens move instantly from `reserved_assets` → `total_assets`
+    - **Impact**: This creates a step-function jump in share price for all active stakers—not a slow drip
+  </Card>
+</CardGroup>
+
+---
+
+## Vault Lifecycle
+
+<Steps>
+  <Step title="Entry (Staking) - 2 week period">
+    Users deposit \$ZC and are minted \$sZC (shares) based on the current price. Yield dripping is active. **Unstaking is disabled**.
+
+    Standard "Funding Mode" allows unlimited deposits.
+  </Step>
+  <Step title="Unbonding (Unstaking Request)">
+    Further \$ZC deposits are disabled. Yield dripping is stopped. **Unstaking requests are enabled**. Slashed funds are instantly distributed to remaining Stakers.
+
+    **Unstaking requests are for 100% of your position**—partial unstaking is not supported. 
+
+    Requesting an exit initiates a **1-day (24 hour) unbonding timer**. 
+    
+    Unbonding tokens move from `total_assets` to `reserved_assets` and **yield accumulation stops instantly**.
+  </Step>
+  <Step title="Exit (Withdrawal)">
+    **After exactly 24 hours**, the `complete_unstake` function becomes available to the Staker.
+
+    Staker withdraws their principal + all yield accrued up until the moment of their Unstaking Request and are freed of their Staker's Obligation.
+  </Step>
+</Steps>
+
+<Warning>
+Stakers can be slashed at any time between staking and completely unstaking their position—including during the unbonding period.
+</Warning>
+
+---
+
+## Economic Parameters
+
+| Parameter | Value | Description |
+| :--- | :--- | :--- |
+| **Spot Fee** | 0.5% | Collected from all AMM swaps of Combinator controlled tokens |
+| **Quantum Fee** | 0.5% | Collected from position trades |
+| **Staking Period** | 1,209,600s | The fixed wait time to request unbonding (2 weeks) |
+| **Unbonding Period** | 86,400s | The fixed wait time to exit (1 day) |
+| **Min. Stake** | 1.0 ZC | Minimum balance to maintain a stake PDA |
+| **Slashing Fee** | 100% | 100% of seized assets go to other stakers |
+
+---
+
+## Looking Ahead
+
+This is the first iteration of the Staking Vault and \$ZC work tokenomics. Expect future iterations as the protocol evolves. All feedback is welcome.

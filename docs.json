@@ -27,6 +27,7 @@
             "group": "Protocol",
             "pages": [
               "governance",
+              "staking",
               "addresses"
             ]
           },

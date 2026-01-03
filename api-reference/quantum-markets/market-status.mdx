@@ -1,0 +1,265 @@
+---
+title: "Market Status"
+description: "GET /api/proposals/market-status - Query real-time quantum market status and TWAP"
+---
+
+## Overview
+
+Retrieves the current status of a quantum market proposal, including real-time TWAP (Time-Weighted Average Price) and price observations for each option. This is a public endpoint that does not require authentication.
+
+## Endpoints
+
+| Endpoint | Description |
+| --- | --- |
+| `GET /api/proposals/market-status` | Returns the latest (highest ID) proposal |
+| `GET /api/proposals/:id/market-status` | Returns a specific proposal by ID |
+
+<CodeGroup>
+
+```bash curl
+# Latest proposal for moderator 1
+curl "https://api.zcombinator.io/api/proposals/market-status?moderatorId=1"
+
+# Specific proposal #42 for moderator 3
+curl "https://api.zcombinator.io/api/proposals/42/market-status?moderatorId=3"
+```
+
+```javascript fetch
+// Latest proposal
+const response = await fetch(
+  'https://api.zcombinator.io/api/proposals/market-status?moderatorId=1'
+);
+const result = await response.json();
+
+// Specific proposal
+const specificResponse = await fetch(
+  'https://api.zcombinator.io/api/proposals/42/market-status?moderatorId=3'
+);
+const specificResult = await specificResponse.json();
+```
+
+```python requests
+import requests
+
+# Latest proposal
+response = requests.get(
+    'https://api.zcombinator.io/api/proposals/market-status',
+    params={'moderatorId': 1}
+)
+result = response.json()
+
+# Specific proposal
+specific_response = requests.get(
+    'https://api.zcombinator.io/api/proposals/42/market-status',
+    params={'moderatorId': 3}
+)
+specific_result = specific_response.json()
+```
+
+</CodeGroup>
+
+## Query Parameters
+
+<ParamField query="moderatorId" type="number" default="1">
+  The moderator ID to query proposals for
+</ParamField>
+
+## Path Parameters
+
+<ParamField path="id" type="number">
+  Specific proposal ID to query (optional - omit for latest proposal)
+</ParamField>
+
+## Response
+
+<ResponseField name="moderatorId" type="number">
+  The moderator ID for this proposal
+</ResponseField>
+
+<ResponseField name="proposalId" type="number">
+  Unique proposal identifier
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Proposal title
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Proposal description
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status: `"live"` (actively trading) or `"completed"` (finalized)
+</ResponseField>
+
+<ResponseField name="createdAt" type="number">
+  Unix timestamp of creation (milliseconds)
+</ResponseField>
+
+<ResponseField name="endsAt" type="number">
+  Unix timestamp of when the market ends (milliseconds). Use this to schedule the next market.
+</ResponseField>
+
+<ResponseField name="finalizedAt" type="number | null">
+  Unix timestamp of finalization, or `null` if still live
+</ResponseField>
+
+<ResponseField name="options" type="array">
+  Array of market options with pricing data
+
+  <Expandable title="Option object properties">
+    <ResponseField name="index" type="number">
+      Zero-based index of this option
+    </ResponseField>
+
+    <ResponseField name="label" type="string">
+      Display label for this option
+    </ResponseField>
+
+    <ResponseField name="twap" type="number">
+      Time-weighted average price (0-1 range, represents probability)
+    </ResponseField>
+
+    <ResponseField name="currentPrice" type="number">
+      Current price (may differ from TWAP)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="leadingOption" type="object">
+  The option with the highest TWAP (current winner)
+
+  <Expandable title="Leading option properties">
+    <ResponseField name="index" type="number">
+      Zero-based index of the leading option
+    </ResponseField>
+
+    <ResponseField name="label" type="string">
+      Display label of the leading option
+    </ResponseField>
+
+    <ResponseField name="twap" type="number">
+      TWAP of the leading option
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "moderatorId": 1,
+  "proposalId": 42,
+  "title": "Should we slash 0x123...?",
+  "description": "Proposal to slash staker for protocol violation",
+  "status": "live",
+  "createdAt": 1735789200000,
+  "endsAt": 1735875600000,
+  "finalizedAt": null,
+  "options": [
+    { "index": 0, "label": "No", "twap": 0.35, "currentPrice": 0.34 },
+    { "index": 1, "label": "20%", "twap": 0.15, "currentPrice": 0.16 },
+    { "index": 2, "label": "40%", "twap": 0.25, "currentPrice": 0.24 },
+    { "index": 3, "label": "60%", "twap": 0.25, "currentPrice": 0.26 }
+  ],
+  "leadingOption": {
+    "index": 0,
+    "label": "No",
+    "twap": 0.35
+  }
+}
+```
+
+## Understanding TWAP vs Current Price
+
+<CardGroup cols={2}>
+  <Card title="Time-Weighted Average Price (TWAP)" icon="chart-line">
+    Smoothed price over time that resists manipulation. This is used for final outcome determination.
+  </Card>
+  <Card title="Current Price" icon="eye">
+    Real-time market price that may fluctuate more rapidly. Useful for live trading signals.
+  </Card>
+</CardGroup>
+
+<Info>
+The `leadingOption` is determined by the highest TWAP, not the current observation. This ensures manipulation-resistant outcome resolution.
+</Info>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid Proposal ID">
+    ```json
+    {
+      "error": "Invalid proposal ID"
+    }
+    ```
+
+    The provided proposal ID is not a valid number.
+  </Accordion>
+
+  <Accordion title="404 - Proposal Not Found">
+    ```json
+    {
+      "error": "Proposal not found"
+    }
+    ```
+
+    No proposal exists with the given ID for the specified moderator.
+  </Accordion>
+
+  <Accordion title="404 - Moderator Not Found">
+    ```json
+    {
+      "error": "Moderator not found"
+    }
+    ```
+
+    The specified moderator ID does not exist.
+  </Accordion>
+</AccordionGroup>
+
+## Polling Best Practices
+
+When polling for market updates:
+
+<Steps>
+<Step title="Set Appropriate Interval">
+Poll every 5-10 seconds for live markets. More frequent polling provides minimal benefit due to TWAP smoothing.
+</Step>
+
+<Step title="Check Status First">
+If `status === "completed"`, stop polling and use the final `leadingOption` as the resolved outcome.
+</Step>
+
+<Step title="Handle Rate Limits">
+Implement exponential backoff if you receive rate limit errors.
+</Step>
+</Steps>
+
+## Scheduling the Next Market
+
+Use `endsAt` to automatically trigger the next market when the current one completes:
+
+```javascript
+const data = await fetch(
+  'https://api.zcombinator.io/api/proposals/market-status?moderatorId=6'
+).then(r => r.json());
+
+if (data.status === 'live') {
+  const msUntilEnd = data.endsAt - Date.now();
+  // Schedule the next proposal shortly after this one ends
+  setTimeout(() => createNextProposal(), msUntilEnd + 5000);
+}
+```
+
+This pattern enables continuous market loops—each market automatically spawns the next.
+
+## Use Cases
+
+| Use Case | Implementation |
+| --- | --- |
+| **Display live odds** | Use `observation` for real-time UI updates |
+| **Determine winner** | Use `leadingOption.label` when `status === "completed"` |
+| **Schedule next market** | Use `endsAt` to trigger the next proposal automatically |
+| **Arbitrage detection** | Compare `observation` vs `twap` for price discrepancies |

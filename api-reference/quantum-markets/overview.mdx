@@ -1,0 +1,116 @@
+---
+title: "Quantum Markets Overview"
+description: "Turn market sentiment into a programmable variable for your protocol."
+---
+
+## What is a Quantum Market?
+
+You can think of Quantum Markets as **modular feedback controllers** for your protocol.
+
+They function like sensors that constantly update a variable in your system based on the aggregated intelligence of the market.
+
+You can plug Quantum Markets into your product to **continuously update a variable with a market-derived value** that other components can query and act on.
+
+## The Feedback Loop (Thermostat Analogy)
+
+To understand how Quantum Markets optimize a protocol, compare them to how a thermostat stabilizes room temperature.
+
+Both systems are designed to constantly steer the system toward the **Right State**—the setting that yields the best outcome—by reacting to changes in the environment.
+
+| Component | Thermostat | Quantum Market |
+| :--- | :--- | :--- |
+| **The Goal** | Maintain Room Temp at 72°F. | Maintain **Optimal Revenue Share %**. |
+| **The Disturbance** | Open window (Room gets cold). | **Product usage spikes** (Environment changes). |
+| **The Correction** | Heater turns on to close the gap. | **Market reprices the Rev Share %** to match the new volume. |
+| **The Result** | Stable Temperature | **The Right State** (Maximized Value). |
+
+## How it Works
+
+<Steps>
+  <Step title="Define the Variable">
+    You identify a parameter in your system that needs steering.
+    * *Example:* `revenue_share_percentage` (What % of fees go to stakers?)
+  </Step>
+
+  <Step title="The Market Resolves the Value">
+    Traders continuously buy and sell outcomes. If product usage spikes, traders might predict that a *lower* individual share (but higher aggregate volume) or a *higher* share (to capture yield) is now the optimal setting for the protocol's health.
+  </Step>
+
+  <Step title="System Actuation">
+    Your smart contract queries the market price. It sees the consensus has shifted from `5%` to `12%` based on the new revenue data.
+  </Step>
+
+  <Step title="Update State">
+    The contract automatically updates the `revenue_share_percentage` variable to `12%`, keeping the protocol in the **Right State** without manual governance intervention.
+  </Step>
+
+  <Step title="Repeat">
+    The market restarts. Conditions change. Traders reprice. The next optimal value emerges. Your protocol updates again—automatically.
+  </Step>
+</Steps>
+
+<Info>
+This loop can be set up to run continuously. No proposals to draft, no quorum to hit, no multisig to coordinate. Just a market that never stops finding the Right State.
+</Info>
+
+## What Can You Build?
+
+Think about **dynamic, subjective parameters** that are not easily codified.
+
+<CardGroup cols={2}>
+  <Card title="Daily Emission Rates" icon="wave-sine">
+    **Problem:** Static emissions waste tokens when activity is low.
+    **Solution:** Each day, a market resolves the optimal emission rate. High activity yesterday? Emissions increase. Quiet week? Treasury saves tokens automatically.
+  </Card>
+  <Card title="Revenue Share %" icon="percent">
+    **Problem:** Fee splits are set once and never revisited.
+    **Solution:** A daily market finds the optimal staker/treasury split. As protocol revenue grows, the market recalibrates who gets what.
+  </Card>
+  <Card title="Treasury Allocation" icon="vault">
+    **Problem:** Grant committees are slow and political.
+    **Solution:** A daily market ranks funding priorities. Marketing vs engineering vs liquidity incentives—let the market decide each day.
+  </Card>
+  <Card title="Launchpad Curation" icon="rocket">
+    **Problem:** Picking which project launches next is subjective and hard to get right.
+    **Solution:** A daily market ranks startups competing for a launch slot. The project the market believes will perform best gets to launch today.
+  </Card>
+</CardGroup>
+
+## Integration Pattern
+
+**Give your Quantum Market teeth.** Plug the market signal into your tech stack so it can actually execute logic—not just output a number.
+
+```javascript
+// The Quantum Market Loop
+async function runQuantumMarketLoop(moderatorId) {
+  while (true) {
+    // 1. Get current market status
+    const market = await fetch(
+      `https://api.zcombinator.io/api/proposals/market-status?moderatorId=${moderatorId}`
+    ).then(r => r.json());
+
+    if (market.status === 'live') {
+      // 2. Wait until market ends
+      const msUntilEnd = market.endsAt - Date.now();
+      await sleep(msUntilEnd + 5000); // Wait for settlement
+      continue;
+    }
+
+    // 3. Market completed — apply the winning option
+    const winner = market.leadingOption;
+    await protocolConfig.setRevenueShare(winner.index);
+
+    // 4. Start the next market to find the next Right State
+    await createNextProposal(moderatorId);
+  }
+}
+```
+
+Each cycle: **Market runs → Settles → Winner applied → New market starts**. Your protocol stays in the Right State forever, automatically.
+
+## API Endpoints
+
+Use these endpoints to create and monitor Quantum Markets:
+
+- [Create Proposal](/api-reference/quantum-markets/create-proposal) - Launch a new market with 2-8 options
+- [Market Status](/api-reference/quantum-markets/market-status) - Get live prices, see which option is winning or has won, and check end time to trigger the next market

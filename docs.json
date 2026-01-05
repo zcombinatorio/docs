@@ -49,11 +49,11 @@
             ]
           },
           {
-            "group": "Claim Token Emissions",
+            "group": "Manage Quantum Markets",
             "pages": [
-              "api-reference/claims/eligibility",
-              "api-reference/claims/mint",
-              "api-reference/claims/confirm"
+              "api-reference/quantum-markets/overview",
+              "api-reference/quantum-markets/create-proposal",
+              "api-reference/quantum-markets/market-status"
             ]
           },
           {
@@ -77,6 +77,14 @@
             "pages": [
               "api-reference/dlmm-liquidity/withdraw-build",
               "api-reference/dlmm-liquidity/withdraw-confirm"
+            ]
+          },
+          {
+            "group": "Claim Token Emissions",
+            "pages": [
+              "api-reference/claims/eligibility",
+              "api-reference/claims/mint",
+              "api-reference/claims/confirm"
             ]
           },
           {

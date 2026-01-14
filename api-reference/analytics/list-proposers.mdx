@@ -1,0 +1,109 @@
+---
+title: "List Proposers"
+description: "GET /dao/:daoPda/proposers - List whitelisted proposers for a DAO"
+---
+
+## Overview
+
+Returns the list of whitelisted proposers for a specific DAO.
+
+<CodeGroup>
+
+```bash curl
+curl https://api.zcombinator.io/dao/Dao1xgp...ABC/proposers
+```
+
+```javascript fetch
+const daoPda = 'Dao1xgp...ABC';
+const response = await fetch(`https://api.zcombinator.io/dao/${daoPda}/proposers`);
+const { owner, proposers } = await response.json();
+```
+
+```python requests
+import requests
+
+dao_pda = "Dao1xgp...ABC"
+response = requests.get(f'https://api.zcombinator.io/dao/{dao_pda}/proposers')
+data = response.json()
+```
+
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="daoPda" type="string" required>
+  The DAO's Program Derived Address
+</ParamField>
+
+## Response
+
+<ResponseField name="owner" type="string">
+  The DAO owner's wallet address
+</ResponseField>
+
+<ResponseField name="proposers" type="array">
+  Array of proposer objects
+</ResponseField>
+
+### Proposer Object
+
+<ResponseField name="id" type="number">
+  Internal proposer ID
+</ResponseField>
+
+<ResponseField name="dao_id" type="number">
+  Parent DAO's internal ID
+</ResponseField>
+
+<ResponseField name="proposer_wallet" type="string">
+  Whitelisted wallet address
+</ResponseField>
+
+<ResponseField name="added_by" type="string">
+  Wallet that added this proposer
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  ISO timestamp when the proposer was added
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "owner": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+  "proposers": [
+    {
+      "id": 1,
+      "dao_id": 1,
+      "proposer_wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "added_by": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "created_at": "2025-01-13T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "dao_id": 1,
+      "proposer_wallet": "Proposer2xgp...XYZ",
+      "added_by": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "created_at": "2025-01-14T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="404 - DAO Not Found">
+    ```json
+    {
+      "error": "DAO not found"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Notes
+
+- The DAO owner is always authorized to create proposals, regardless of whitelist status
+- Proposers can also qualify via token threshold (see [Set Token Threshold](/api-reference/dao/set-threshold))

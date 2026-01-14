@@ -1,0 +1,103 @@
+---
+title: "SDK Overview"
+description: "Build on-chain integrations with @zcomb/programs-sdk"
+---
+
+## Overview
+
+The `@zcomb/programs-sdk` package provides TypeScript/JavaScript bindings for interacting directly with Combinator's on-chain programs. Use it for building custom integrations, bots, or applications that need low-level control.
+
+## When to Use SDK vs REST API
+
+| Use Case | Recommended |
+|----------|-------------|
+| Web application with wallet adapter | REST API |
+| Server-side bot / automation | SDK |
+| Custom transaction building | SDK |
+| Simple trading interface | REST API |
+| Low-level on-chain access | SDK |
+| No backend infrastructure | SDK |
+
+### REST API Advantages
+- **Easier integration** - Standard HTTP requests
+- **Transaction handling** - Build/execute pattern handles complexity
+- **Language agnostic** - Works with any language that can make HTTP calls
+- **Less code** - Don't need to manage Solana primitives
+
+### SDK Advantages
+- **Full control** - Build custom transactions
+- **Direct on-chain access** - No intermediary server
+- **Composability** - Combine with other Solana programs
+- **Self-custody** - Transactions never leave your environment
+
+## Package Contents
+
+The SDK exports:
+
+```typescript
+import {
+  futarchy,         // Namespace with FutarchyClient and utilities
+  VaultType,        // Enum for vault types (Base, Quote)
+  // ... additional exports
+} from '@zcomb/programs-sdk';
+```
+
+### FutarchyClient
+
+The main entry point for interacting with the futarchy program:
+
+```typescript
+const client = new futarchy.FutarchyClient(provider);
+
+// Fetch proposal data
+const proposal = await client.fetchProposal(proposalPda);
+
+// Access vault operations
+const builder = await client.vault.deposit(user, vault, VaultType.Base, amount);
+
+// Access AMM operations
+const quote = await client.amm.quote(pool, swapAToB, inputAmount);
+```
+
+### Key Modules
+
+| Module | Description |
+|--------|-------------|
+| `client.vault` | Deposit, withdraw, redeem operations |
+| `client.amm` | Swap quotes and execution |
+| `futarchy.parseProposalState` | Parse proposal state from on-chain data |
+| `futarchy.deriveConditionalMint` | Derive conditional token mint PDAs |
+
+## Architecture
+
+```mermaid
+graph TD
+    A[Your Application] --> B[@zcomb/programs-sdk]
+    B --> C[AnchorProvider]
+    C --> D[Solana RPC]
+    D --> E[On-Chain Programs]
+```
+
+The SDK wraps Anchor's program interface, providing:
+- Type-safe method calls
+- Transaction building utilities
+- Account fetching helpers
+- PDA derivation functions
+
+## Requirements
+
+- Node.js 18+
+- TypeScript 4.9+ (recommended)
+- Solana wallet or keypair for signing
+- RPC endpoint (mainnet or devnet)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/api-reference/sdk/installation">
+    Install the SDK and dependencies
+  </Card>
+  <Card title="Quickstart" icon="play" href="/api-reference/sdk/quickstart">
+    Build your first transaction
+  </Card>
+</CardGroup>

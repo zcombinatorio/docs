@@ -1,0 +1,151 @@
+---
+title: "User Balances"
+description: "GET /dao/proposal/:proposalPda/balances/:wallet - Get user token balances for a proposal"
+---
+
+## Overview
+
+Returns the user's token balances for both base and quote vaults, including regular tokens and all conditional token variants.
+
+<CodeGroup>
+```bash curl
+curl https://api.zcombinator.io/dao/proposal/ABC123.../balances/UserWallet123...
+```
+```javascript fetch
+const response = await fetch(
+  `https://api.zcombinator.io/dao/proposal/${proposalPda}/balances/${walletAddress}`
+);
+const balances = await response.json();
+```
+```python requests
+import requests
+
+response = requests.get(
+    f'https://api.zcombinator.io/dao/proposal/{proposal_pda}/balances/{wallet}'
+)
+balances = response.json()
+```
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="proposalPda" type="string" required>
+  The Solana PDA of the proposal
+</ParamField>
+
+<ParamField path="wallet" type="string" required>
+  The user's Solana wallet address
+</ParamField>
+
+## Response
+
+<ResponseField name="proposalPda" type="string">
+  The proposal PDA
+</ResponseField>
+
+<ResponseField name="wallet" type="string">
+  The queried wallet address
+</ResponseField>
+
+<ResponseField name="vaultPda" type="string">
+  The vault's Solana PDA
+</ResponseField>
+
+<ResponseField name="base" type="object">
+  Base token balances (DAO's native token)
+</ResponseField>
+
+<ResponseField name="quote" type="object">
+  Quote token balances (e.g., USDC)
+</ResponseField>
+
+### Balance Object
+
+<ResponseField name="base.regular" type="string">
+  User's regular (non-conditional) token balance
+</ResponseField>
+
+<ResponseField name="base.conditionalBalances" type="array">
+  Array of conditional token balances for each outcome (index 0 = pass, index 1 = fail)
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "proposalPda": "ABC123...",
+  "wallet": "UserWallet123...",
+  "vaultPda": "Vault789...",
+  "base": {
+    "regular": "5000000000",
+    "conditionalBalances": [
+      "2500000000",
+      "2500000000"
+    ]
+  },
+  "quote": {
+    "regular": "100000000",
+    "conditionalBalances": [
+      "50000000",
+      "50000000"
+    ]
+  }
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid proposal PDA">
+    ```json
+    { "error": "Invalid proposal PDA" }
+    ```
+  </Accordion>
+  <Accordion title="400 - Invalid wallet address">
+    ```json
+    { "error": "Invalid wallet address" }
+    ```
+  </Accordion>
+  <Accordion title="404 - Proposal not found">
+    ```json
+    {
+      "error": "Proposal not found on-chain",
+      "details": "Account not found..."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Understanding Balances
+
+### Token Types
+
+| Type | Description |
+|------|-------------|
+| `regular` | Standard tokens that can be deposited to create conditional tokens |
+| `conditionalBalances[0]` | Pass tokens - redeemable if proposal passes |
+| `conditionalBalances[1]` | Fail tokens - redeemable if proposal fails |
+
+### Balance Lifecycle
+
+1. **Deposit** - Regular tokens are split into equal amounts of pass and fail tokens
+2. **Trade** - Swap conditional tokens in the AMM to express a position
+3. **Withdraw** - Merge equal amounts of pass and fail tokens back to regular tokens
+4. **Redeem** - After resolution, winning conditional tokens convert to regular tokens
+
+### Example Position Analysis
+
+```json
+{
+  "base": {
+    "regular": "0",
+    "conditionalBalances": ["10000000000", "0"]
+  }
+}
+```
+
+This user has:
+- 0 regular ZC tokens
+- 10 ZC worth of pass tokens
+- 0 fail tokens
+- **Position**: Long on proposal passing

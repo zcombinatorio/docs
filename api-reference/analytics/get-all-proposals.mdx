@@ -1,0 +1,134 @@
+---
+title: "Get All Proposals"
+description: "GET /dao/proposals/all - Get all proposals from all DAOs"
+---
+
+## Overview
+
+Returns all proposals from all DAOs in the system, sorted by creation date (newest first). Useful for building a global markets view.
+
+<CodeGroup>
+
+```bash curl
+curl https://api.zcombinator.io/dao/proposals/all
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/dao/proposals/all');
+const { proposals } = await response.json();
+```
+
+```python requests
+import requests
+
+response = requests.get('https://api.zcombinator.io/dao/proposals/all')
+proposals = response.json()['proposals']
+```
+
+</CodeGroup>
+
+## Response
+
+<ResponseField name="proposals" type="array">
+  Array of proposal objects with DAO metadata
+</ResponseField>
+
+### Proposal Object
+
+All fields from [List Proposals](/api-reference/analytics/list-proposals) plus:
+
+<ResponseField name="daoPda" type="string">
+  The DAO's Program Derived Address
+</ResponseField>
+
+<ResponseField name="daoName" type="string">
+  The DAO's name
+</ResponseField>
+
+<ResponseField name="tokenMint" type="string">
+  The DAO's base token mint
+</ResponseField>
+
+<ResponseField name="tokenIcon" type="string | null">
+  Token icon URL from metadata
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "proposals": [
+    {
+      "id": 3,
+      "proposalPda": "Prop3xgp...GHI",
+      "title": "Increase liquidity incentives",
+      "description": "Double LP rewards for Q2",
+      "options": ["No", "Yes"],
+      "status": "Pending",
+      "winningIndex": null,
+      "vault": "Vault3xgp...JKL",
+      "createdAt": 1736875600000,
+      "endsAt": 1736962000000,
+      "finalizedAt": null,
+      "metadataCid": "QmAbc...",
+      "marketBias": 0,
+      "baseDecimals": 9,
+      "quoteDecimals": 9,
+      "daoPda": "Dao2xgp...DEF",
+      "daoName": "AnotherDAO",
+      "tokenMint": "Token2xgp...MNO",
+      "tokenIcon": "https://arweave.net/..."
+    },
+    {
+      "id": 2,
+      "proposalPda": "Prop2xgp...DEF",
+      "title": "Should we increase staking rewards?",
+      "description": "Proposal to increase staking APY from 5% to 8%",
+      "options": ["No", "Yes"],
+      "status": "Pending",
+      "winningIndex": null,
+      "vault": "Vault1xgp...ABC",
+      "createdAt": 1736789200000,
+      "endsAt": 1736875600000,
+      "finalizedAt": null,
+      "metadataCid": "QmXyz...",
+      "marketBias": 0,
+      "baseDecimals": 9,
+      "quoteDecimals": 9,
+      "daoPda": "Dao1xgp...ABC",
+      "daoName": "MyDAO",
+      "tokenMint": "Token1xgp...JKL",
+      "tokenIcon": "https://arweave.net/..."
+    },
+    {
+      "id": 1,
+      "proposalPda": "Prop1xgp...ABC",
+      "title": "Treasury allocation Q1",
+      "description": "Allocate treasury funds for Q1 initiatives",
+      "options": ["Marketing", "Engineering", "Liquidity"],
+      "status": "Resolved",
+      "winningIndex": 1,
+      "vault": "Vault2xgp...DEF",
+      "createdAt": 1736702800000,
+      "endsAt": 1736789200000,
+      "finalizedAt": 1736789300000,
+      "metadataCid": "QmDef...",
+      "marketBias": 0,
+      "baseDecimals": 9,
+      "quoteDecimals": 9,
+      "daoPda": "Dao1xgp...ABC",
+      "daoName": "MyDAO",
+      "tokenMint": "Token1xgp...JKL",
+      "tokenIcon": "https://arweave.net/..."
+    }
+  ]
+}
+```
+
+## Notes
+
+- Proposals in `Setup` state are filtered out
+- Results include DAO metadata for each proposal
+- Sorted by creation date (newest first)
+- Token icons and decimals are fetched from on-chain metadata
+- This endpoint may take longer to respond as it queries all DAOs

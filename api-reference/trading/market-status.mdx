@@ -1,0 +1,186 @@
+---
+title: "Market Status"
+description: "GET /dao/proposal/:proposalPda/market-status - Get TWAP values, spot prices, and leading option"
+---
+
+## Overview
+
+Returns the current market status for a proposal including TWAP (Time-Weighted Average Price) values, spot prices for each pool, and the current leading option.
+
+<CodeGroup>
+```bash curl
+curl https://api.zcombinator.io/dao/proposal/ABC123.../market-status
+```
+```javascript fetch
+const response = await fetch(
+  'https://api.zcombinator.io/dao/proposal/ABC123.../market-status'
+);
+const data = await response.json();
+```
+```python requests
+import requests
+
+response = requests.get(
+    'https://api.zcombinator.io/dao/proposal/ABC123.../market-status'
+)
+data = response.json()
+```
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="proposalPda" type="string" required>
+  The Solana PDA (Program Derived Address) of the proposal
+</ParamField>
+
+## Response
+
+<ResponseField name="proposalPda" type="string">
+  The proposal PDA
+</ResponseField>
+
+<ResponseField name="state" type="string">
+  Current proposal state: `initialized`, `pending`, or `resolved`
+</ResponseField>
+
+<ResponseField name="winningIndex" type="number">
+  Index of the winning option (only present when state is `resolved`)
+</ResponseField>
+
+<ResponseField name="numOptions" type="number">
+  Number of options in the proposal (typically 2 for pass/fail)
+</ResponseField>
+
+<ResponseField name="pools" type="array">
+  Array of pool data objects containing prices and oracle info
+</ResponseField>
+
+<ResponseField name="leadingOption" type="number | null">
+  Index of the option with highest TWAP, or null if no TWAP data yet
+</ResponseField>
+
+<ResponseField name="timing" type="object">
+  Timing information for the proposal
+</ResponseField>
+
+### Pool Object
+
+<ResponseField name="pools[].index" type="number">
+  Pool index (0 = pass, 1 = fail)
+</ResponseField>
+
+<ResponseField name="pools[].poolPda" type="string">
+  The pool's Solana PDA
+</ResponseField>
+
+<ResponseField name="pools[].spotPrice" type="string">
+  Current spot price (raw BN string)
+</ResponseField>
+
+<ResponseField name="pools[].twap" type="string | null">
+  Time-weighted average price, or null if oracle not warmed up
+</ResponseField>
+
+<ResponseField name="pools[].oracle" type="object">
+  Oracle configuration including warmup period
+</ResponseField>
+
+### Timing Object
+
+<ResponseField name="timing.createdAt" type="number">
+  Unix timestamp when proposal was created
+</ResponseField>
+
+<ResponseField name="timing.length" type="number">
+  Duration of the proposal in seconds
+</ResponseField>
+
+<ResponseField name="timing.endTime" type="number">
+  Unix timestamp when proposal ends
+</ResponseField>
+
+<ResponseField name="timing.timeRemaining" type="number">
+  Seconds remaining in the proposal
+</ResponseField>
+
+<ResponseField name="timing.hasEnded" type="boolean">
+  Whether the proposal time has elapsed
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "proposalPda": "ABC123...",
+  "state": "pending",
+  "numOptions": 2,
+  "pools": [
+    {
+      "index": 0,
+      "poolPda": "Pool123...",
+      "spotPrice": "1050000000",
+      "twap": "1045000000",
+      "oracle": {
+        "createdAt": 1704067200,
+        "warmupDuration": 3600,
+        "lastUpdate": 1704070800
+      }
+    },
+    {
+      "index": 1,
+      "poolPda": "Pool456...",
+      "spotPrice": "950000000",
+      "twap": "955000000",
+      "oracle": {
+        "createdAt": 1704067200,
+        "warmupDuration": 3600,
+        "lastUpdate": 1704070800
+      }
+    }
+  ],
+  "leadingOption": 0,
+  "timing": {
+    "createdAt": 1704067200,
+    "length": 604800,
+    "endTime": 1704672000,
+    "timeRemaining": 518400,
+    "hasEnded": false
+  }
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid proposal PDA">
+    ```json
+    { "error": "Invalid proposal PDA" }
+    ```
+  </Accordion>
+  <Accordion title="404 - Proposal not found">
+    ```json
+    {
+      "error": "Proposal not found on-chain",
+      "details": "Account not found..."
+    }
+    ```
+  </Accordion>
+  <Accordion title="500 - Server error">
+    ```json
+    {
+      "error": "Failed to fetch market status",
+      "details": "Connection timeout..."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Understanding TWAP
+
+The TWAP (Time-Weighted Average Price) is calculated by the on-chain oracle over the proposal duration. It's used to determine the winning outcome when the proposal finalizes.
+
+- **Higher TWAP** = More confidence in that outcome
+- **Leading option** = The outcome with the highest current TWAP
+- **Warmup period** = Oracle must run for a minimum time before TWAP is valid
+
+The winning outcome is determined by comparing the pass TWAP vs fail TWAP at proposal finalization.

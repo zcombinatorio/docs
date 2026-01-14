@@ -36,6 +36,14 @@
             "pages": [
               "how-to-trade"
             ]
+          },
+          {
+            "group": "Build With Quantum Markets",
+            "pages": [
+              "quantum-markets/overview",
+              "quantum-markets/create-proposal",
+              "quantum-markets/market-status"
+            ]
           }
         ]
       },
@@ -49,55 +57,53 @@
             ]
           },
           {
-            "group": "Manage Quantum Markets",
+            "group": "DAO Management API",
             "pages": [
-              "api-reference/quantum-markets/overview",
-              "api-reference/quantum-markets/create-proposal",
-              "api-reference/quantum-markets/market-status"
+              "api-reference/dao/overview",
+              "api-reference/dao/create-dao",
+              "api-reference/dao/add-proposer",
+              "api-reference/dao/remove-proposer",
+              "api-reference/dao/set-threshold",
+              "api-reference/dao/set-withdrawal-percentage"
             ]
           },
           {
-            "group": "Claim LP Fees",
+            "group": "Proposals API",
             "pages": [
-              "api-reference/fee-claim/claim",
-              "api-reference/fee-claim/confirm"
+              "api-reference/proposals/create"
             ]
           },
           {
-            "group": "Manage DAMM Liquidity",
+            "group": "Analytics API",
             "pages": [
-              "api-reference/damm-liquidity/deposit-build",
-              "api-reference/damm-liquidity/deposit-confirm",
-              "api-reference/damm-liquidity/withdraw-build",
-              "api-reference/damm-liquidity/withdraw-confirm"
+              "api-reference/analytics/list-daos",
+              "api-reference/analytics/get-dao",
+              "api-reference/analytics/list-proposers",
+              "api-reference/analytics/list-proposals",
+              "api-reference/analytics/get-live-proposal",
+              "api-reference/analytics/get-all-proposals",
+              "api-reference/analytics/get-proposal"
             ]
           },
           {
-            "group": "Manage DLMM Liquidity",
+            "group": "Trading API",
             "pages": [
-              "api-reference/dlmm-liquidity/withdraw-build",
-              "api-reference/dlmm-liquidity/withdraw-confirm"
+              "api-reference/trading/overview",
+              "api-reference/trading/market-status",
+              "api-reference/trading/balances",
+              "api-reference/trading/quote",
+              "api-reference/trading/swap",
+              "api-reference/trading/deposit",
+              "api-reference/trading/withdraw",
+              "api-reference/trading/redeem"
             ]
           },
           {
-            "group": "Claim Token Emissions",
+            "group": "SDK",
             "pages": [
-              "api-reference/claims/eligibility",
-              "api-reference/claims/mint",
-              "api-reference/claims/confirm"
-            ]
-          },
-          {
-            "group": "ICO Sales",
-            "pages": [
-              "api-reference/ico/sale-info",
-              "api-reference/ico/create",
-              "api-reference/ico/purchase-history",
-              "api-reference/ico/purchase-prepare",
-              "api-reference/ico/purchase-confirm",
-              "api-reference/ico/claim-info",
-              "api-reference/ico/claim-prepare",
-              "api-reference/ico/claim-confirm"
+              "api-reference/sdk/overview",
+              "api-reference/sdk/installation",
+              "api-reference/sdk/quickstart"
             ]
           }
         ]

@@ -5,7 +5,7 @@ description: "PUT /dao/:daoPda/withdrawal-percentage - Configure the liquidity w
 
 ## Overview
 
-Sets the percentage of liquidity withdrawn from the Meteora pool when a Quantum Market proposal is created. This liquidity is used to seed the Quantum Market AMMs.
+Sets the percentage of liquidity withdrawn from the Meteora pool when a futarchy proposal is created. This liquidity is used to seed the futarchy AMMs.
 
 <CodeGroup>
 
@@ -154,7 +154,7 @@ result = response.json()
 
 ## How Withdrawal Percentage Works
 
-When a Quantum Market proposal is launched:
+When a futarchy proposal is launched:
 
 1. The configured percentage of liquidity is withdrawn from the Meteora pool
 2. This liquidity seeds the Pass and Fail conditional token AMMs
@@ -163,7 +163,7 @@ When a Quantum Market proposal is launched:
 <Info>
 **Default:** 12%
 
-Higher percentages provide deeper liquidity for Quantum Market trading but temporarily reduce main pool liquidity.
+Higher percentages provide deeper liquidity for futarchy trading but temporarily reduce main pool liquidity.
 </Info>
 
 ## Percentage Guidelines

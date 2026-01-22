@@ -17,32 +17,16 @@
             "group": "Overview",
             "pages": [
               "index",
-              "the-problem",
-              "quantum-markets",
-              "the-vision",
+              "how-to-trade",
               "writings"
             ]
           },
           {
             "group": "Protocol",
             "pages": [
-              "governance",
               "staking",
+              "governance",
               "addresses"
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              "how-to-trade"
-            ]
-          },
-          {
-            "group": "Build With Quantum Markets",
-            "pages": [
-              "quantum-markets/overview",
-              "quantum-markets/create-proposal",
-              "quantum-markets/market-status"
             ]
           }
         ]

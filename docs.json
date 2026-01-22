@@ -48,8 +48,15 @@
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "API & SDK",
         "groups": [
+          {
+            "group": "Resources",
+            "pages": [
+              "api-reference/github",
+              "api-reference/contact"
+            ]
+          },
           {
             "group": "Utility",
             "pages": [

@@ -8,10 +8,10 @@ description: "Merge conditional tokens back into regular tokens"
 Withdraw (merge) conditional tokens back into regular tokens. This is useful for exiting a position without taking directional risk.
 
 ```
-1 pass token + 1 fail token → 1 regular token
+1 token of each outcome → 1 regular token
 ```
 
-You must have **equal amounts** of both pass and fail tokens to withdraw. This is the inverse of depositing.
+You must have **equal amounts** of all conditional tokens to withdraw. This is the inverse of depositing.
 
 This is a two-step process:
 1. **Build** - Request an unsigned transaction from the API
@@ -298,7 +298,7 @@ async function withdrawTokens(proposalPda, wallet, vaultType, amount, signTransa
 
 ## When to Withdraw
 
-- **Exit without position** - If you have equal pass and fail tokens, merge them back
+- **Exit without position** - If you have equal amounts of each conditional token, merge them back
 - **Rebalance** - Partial withdrawal to reduce exposure
 - **Before resolution** - Convert back to regular tokens if outcome is uncertain
 
@@ -309,13 +309,13 @@ async function withdrawTokens(proposalPda, wallet, vaultType, amount, signTransa
 You **cannot withdraw** if you have an unequal position:
 
 ```json
-// This position CANNOT be withdrawn directly:
+// This position CANNOT be withdrawn directly (example with 2 outcomes):
 {
-  "conditionalBalances": ["150000000", "50000000"]  // 150 pass, 50 fail
+  "conditionalBalances": ["150000000", "50000000"]  // 150 outcome-0, 50 outcome-1
 }
 
-// First swap 50 pass for fail to equalize
-// Then you can withdraw 100 (50 pass + 50 fail)
+// First swap to equalize your balances
+// Then you can withdraw 50 (the minimum across all outcomes)
 ```
 
 ---
@@ -325,4 +325,4 @@ You **cannot withdraw** if you have an unequal position:
 - The regular token ATA is created automatically if needed
 - Amount must not exceed your minimum conditional token balance
 - Withdraw is only available during the pending (active trading) state
-- After withdrawal, equal amounts of pass and fail tokens are burned
+- After withdrawal, equal amounts of each conditional token are burned

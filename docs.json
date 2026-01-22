@@ -32,7 +32,7 @@
         ]
       },
       {
-        "tab": "API & SDK",
+        "tab": "API",
         "groups": [
           {
             "group": "Resources",
@@ -56,6 +56,13 @@
               "api-reference/dao/remove-proposer",
               "api-reference/dao/set-threshold",
               "api-reference/dao/set-withdrawal-percentage"
+            ]
+          },
+          {
+            "group": "Fee Claim API",
+            "pages": [
+              "api-reference/fee-claim/claim",
+              "api-reference/fee-claim/confirm"
             ]
           },
           {
@@ -87,14 +94,6 @@
               "api-reference/trading/deposit",
               "api-reference/trading/withdraw",
               "api-reference/trading/redeem"
-            ]
-          },
-          {
-            "group": "SDK",
-            "pages": [
-              "api-reference/sdk/overview",
-              "api-reference/sdk/installation",
-              "api-reference/sdk/quickstart"
             ]
           }
         ]

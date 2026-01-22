@@ -66,7 +66,7 @@ balances = response.json()
 </ResponseField>
 
 <ResponseField name="base.conditionalBalances" type="array">
-  Array of conditional token balances for each outcome (index 0 = pass, index 1 = fail)
+  Array of conditional token balances for each outcome (index corresponds to outcome option)
 </ResponseField>
 
 ### Success Response
@@ -123,14 +123,13 @@ balances = response.json()
 | Type | Description |
 |------|-------------|
 | `regular` | Standard tokens that can be deposited to create conditional tokens |
-| `conditionalBalances[0]` | Pass tokens - redeemable if proposal passes |
-| `conditionalBalances[1]` | Fail tokens - redeemable if proposal fails |
+| `conditionalBalances[n]` | Conditional tokens for outcome option n - redeemable if that outcome wins |
 
 ### Balance Lifecycle
 
-1. **Deposit** - Regular tokens are split into equal amounts of pass and fail tokens
+1. **Deposit** - Regular tokens are split into equal amounts of conditional tokens for each outcome
 2. **Trade** - Swap conditional tokens in the AMM to express a position
-3. **Withdraw** - Merge equal amounts of pass and fail tokens back to regular tokens
+3. **Withdraw** - Merge equal amounts of all conditional tokens back to regular tokens
 4. **Redeem** - After resolution, winning conditional tokens convert to regular tokens
 
 ### Example Position Analysis
@@ -144,8 +143,8 @@ balances = response.json()
 }
 ```
 
-This user has:
+This user has (assuming a 2-option proposal):
 - 0 regular ZC tokens
-- 10 ZC worth of pass tokens
-- 0 fail tokens
-- **Position**: Long on proposal passing
+- 10 ZC worth of outcome-0 tokens
+- 0 outcome-1 tokens
+- **Position**: Long on outcome 0 winning

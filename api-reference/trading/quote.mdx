@@ -1,0 +1,175 @@
+---
+title: "Get Quote"
+description: "GET /dao/proposal/:proposalPda/quote - Get a swap quote for a proposal market"
+---
+
+## Overview
+
+Returns a quote for swapping tokens in a proposal's AMM pool. Use this to preview swap outcomes before building a transaction.
+
+<CodeGroup>
+```bash curl
+curl "https://api.zcombinator.io/dao/proposal/ABC123.../quote?poolIndex=0&swapAToB=true&inputAmount=1000000000"
+```
+```javascript fetch
+const params = new URLSearchParams({
+  poolIndex: '0',
+  swapAToB: 'true',
+  inputAmount: '1000000000'
+});
+
+const response = await fetch(
+  `https://api.zcombinator.io/dao/proposal/ABC123.../quote?${params}`
+);
+const quote = await response.json();
+```
+```python requests
+import requests
+
+response = requests.get(
+    'https://api.zcombinator.io/dao/proposal/ABC123.../quote',
+    params={
+        'poolIndex': 0,
+        'swapAToB': 'true',
+        'inputAmount': '1000000000'
+    }
+)
+quote = response.json()
+```
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="proposalPda" type="string" required>
+  The Solana PDA of the proposal
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="poolIndex" type="number" required>
+  The pool index to swap in (0 = pass market, 1 = fail market)
+</ParamField>
+
+<ParamField query="swapAToB" type="boolean" required>
+  Swap direction. `true` = token A to token B, `false` = token B to token A
+</ParamField>
+
+<ParamField query="inputAmount" type="string" required>
+  Input amount in raw token units (including decimals). For example, 1 SOL = "1000000000" (9 decimals)
+</ParamField>
+
+## Response
+
+<ResponseField name="proposalPda" type="string">
+  The proposal PDA
+</ResponseField>
+
+<ResponseField name="poolIndex" type="number">
+  Pool index used for the quote
+</ResponseField>
+
+<ResponseField name="poolPda" type="string">
+  The pool's Solana PDA
+</ResponseField>
+
+<ResponseField name="swapAToB" type="boolean">
+  Swap direction that was quoted
+</ResponseField>
+
+<ResponseField name="inputAmount" type="string">
+  The input amount (raw units)
+</ResponseField>
+
+<ResponseField name="outputAmount" type="string">
+  Expected output amount (raw units)
+</ResponseField>
+
+<ResponseField name="minOutputAmount" type="string">
+  Minimum output with default slippage applied
+</ResponseField>
+
+<ResponseField name="feeAmount" type="string">
+  Fee amount charged for the swap
+</ResponseField>
+
+<ResponseField name="priceImpact" type="number">
+  Price impact as a decimal (e.g., 0.01 = 1%)
+</ResponseField>
+
+<ResponseField name="spotPriceBefore" type="string">
+  Spot price before the swap
+</ResponseField>
+
+<ResponseField name="spotPriceAfter" type="string">
+  Estimated spot price after the swap
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "proposalPda": "ABC123...",
+  "poolIndex": 0,
+  "poolPda": "Pool123...",
+  "swapAToB": true,
+  "inputAmount": "1000000000",
+  "outputAmount": "980000000",
+  "minOutputAmount": "960400000",
+  "feeAmount": "10000000",
+  "priceImpact": 0.0102,
+  "spotPriceBefore": "1000000000",
+  "spotPriceAfter": "1010200000"
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing parameters">
+    ```json
+    {
+      "error": "Missing required query params: poolIndex, swapAToB, inputAmount"
+    }
+    ```
+  </Accordion>
+  <Accordion title="400 - Invalid pool index">
+    ```json
+    {
+      "error": "Invalid pool index: 5. Proposal has 2 options."
+    }
+    ```
+  </Accordion>
+  <Accordion title="400 - Pool not initialized">
+    ```json
+    {
+      "error": "Pool 0 is not initialized"
+    }
+    ```
+  </Accordion>
+  <Accordion title="404 - Proposal not found">
+    ```json
+    {
+      "error": "Proposal not found on-chain",
+      "details": "Account not found..."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Understanding Pool Direction
+
+In futarchy pools:
+- **Token A** = Quote token (e.g., USDC)
+- **Token B** = Conditional token (e.g., pZC or fZC)
+
+| Direction | From | To | Use Case |
+|-----------|------|-----|----------|
+| `swapAToB: true` | Quote | Conditional | Buying outcome tokens |
+| `swapAToB: false` | Conditional | Quote | Selling outcome tokens |
+
+## Price Impact Considerations
+
+- Small trades (< 1% of pool) typically have < 0.5% price impact
+- Large trades may have significant price impact
+- Consider splitting large orders across multiple transactions
+- Quote includes a 10% base fee charged by the AMM

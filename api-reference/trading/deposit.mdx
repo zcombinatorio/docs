@@ -1,0 +1,330 @@
+---
+title: "Deposit"
+description: "Split regular tokens into conditional tokens for trading"
+---
+
+## Overview
+
+Deposit (split) regular tokens into conditional tokens to participate in futarchy. When you deposit, your tokens are split equally into pass and fail conditional tokens.
+
+```
+1 regular token → 1 pass token + 1 fail token
+```
+
+For example, depositing 100 ZC gives you 100 pass-ZC and 100 fail-ZC.
+
+This is a two-step process:
+1. **Build** - Request an unsigned transaction from the API
+2. **Execute** - Sign the transaction and submit it back
+
+---
+
+## Build Transaction
+
+`POST /dao/proposal/:proposalPda/deposit/build`
+
+Builds an unsigned deposit transaction for the user to sign.
+
+<CodeGroup>
+```bash curl
+curl -X POST https://api.zcombinator.io/dao/proposal/ABC123.../deposit/build \
+  -H "Content-Type: application/json" \
+  -d '{
+    "wallet": "UserWallet123...",
+    "vaultType": "base",
+    "amount": "1000000000"
+  }'
+```
+```javascript fetch
+const response = await fetch(
+  'https://api.zcombinator.io/dao/proposal/ABC123.../deposit/build',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      wallet: 'UserWallet123...',
+      vaultType: 'base',
+      amount: '1000000000'
+    })
+  }
+);
+const { requestId, transaction } = await response.json();
+```
+```python requests
+import requests
+
+response = requests.post(
+    'https://api.zcombinator.io/dao/proposal/ABC123.../deposit/build',
+    json={
+        'wallet': 'UserWallet123...',
+        'vaultType': 'base',
+        'amount': '1000000000'
+    }
+)
+data = response.json()
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="proposalPda" type="string" required>
+  The Solana PDA of the proposal
+</ParamField>
+
+### Request Body
+
+<ParamField body="wallet" type="string" required>
+  The user's Solana wallet address
+</ParamField>
+
+<ParamField body="vaultType" type="string" required>
+  Which vault to deposit into: `base` (DAO token) or `quote` (e.g., USDC)
+</ParamField>
+
+<ParamField body="amount" type="string" required>
+  Amount to deposit in raw token units
+</ParamField>
+
+### Build Response
+
+<ResponseField name="requestId" type="string">
+  Unique identifier for this request
+</ResponseField>
+
+<ResponseField name="transaction" type="string">
+  Base58-encoded unsigned transaction
+</ResponseField>
+
+<ResponseField name="expiresAt" type="number">
+  Unix timestamp (ms) when this request expires
+</ResponseField>
+
+<ResponseField name="vaultPda" type="string">
+  The vault's Solana PDA
+</ResponseField>
+
+<ResponseField name="vaultType" type="string">
+  The vault type used (`base` or `quote`)
+</ResponseField>
+
+<ResponseField name="amount" type="string">
+  The deposit amount
+</ResponseField>
+
+```json
+{
+  "requestId": "a1b2c3d4e5f6...",
+  "transaction": "4vJ9JU1bJJE96FwQGq...",
+  "expiresAt": 1704153600000,
+  "vaultPda": "Vault789...",
+  "vaultType": "base",
+  "amount": "1000000000"
+}
+```
+
+---
+
+## Execute Transaction
+
+`POST /dao/proposal/:proposalPda/deposit/execute`
+
+Executes a signed deposit transaction that was previously built.
+
+<CodeGroup>
+```bash curl
+curl -X POST https://api.zcombinator.io/dao/proposal/ABC123.../deposit/execute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "requestId": "a1b2c3d4e5f6...",
+    "signedTransaction": "4vJ9JU1bJJE96FwQGq..."
+  }'
+```
+```javascript fetch
+const response = await fetch(
+  'https://api.zcombinator.io/dao/proposal/ABC123.../deposit/execute',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      requestId: 'a1b2c3d4e5f6...',
+      signedTransaction: bs58.encode(signedTx.serialize())
+    })
+  }
+);
+const { success, signature } = await response.json();
+```
+```python requests
+import requests
+
+response = requests.post(
+    'https://api.zcombinator.io/dao/proposal/ABC123.../deposit/execute',
+    json={
+        'requestId': 'a1b2c3d4e5f6...',
+        'signedTransaction': '<base58-encoded-signed-transaction>'
+    }
+)
+data = response.json()
+```
+</CodeGroup>
+
+### Request Body
+
+<ParamField body="requestId" type="string" required>
+  The request ID returned from the build endpoint
+</ParamField>
+
+<ParamField body="signedTransaction" type="string" required>
+  Base58-encoded transaction with user's signature
+</ParamField>
+
+### Execute Response
+
+<ResponseField name="success" type="boolean">
+  Whether the transaction was successfully submitted and confirmed
+</ResponseField>
+
+<ResponseField name="signature" type="string">
+  The Solana transaction signature
+</ResponseField>
+
+<ResponseField name="proposalPda" type="string">
+  The proposal PDA
+</ResponseField>
+
+<ResponseField name="vaultPda" type="string">
+  The vault PDA
+</ResponseField>
+
+<ResponseField name="vaultType" type="string">
+  The vault type (`base` or `quote`)
+</ResponseField>
+
+```json
+{
+  "success": true,
+  "signature": "5K8M3H...",
+  "proposalPda": "ABC123...",
+  "vaultPda": "Vault789...",
+  "vaultType": "base"
+}
+```
+
+---
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid vault type">
+    ```json
+    { "error": "Invalid vaultType. Must be \"base\" or \"quote\"" }
+    ```
+  </Accordion>
+  <Accordion title="400 - Proposal not active">
+    ```json
+    {
+      "error": "Proposal is not active",
+      "state": "resolved",
+      "message": "Deposits are only available when proposal is in pending state"
+    }
+    ```
+  </Accordion>
+  <Accordion title="400 - Request not found or expired">
+    ```json
+    { "error": "Request not found or expired" }
+    ```
+  </Accordion>
+  <Accordion title="400 - Transaction modified">
+    ```json
+    { "error": "Transaction verification failed: transaction has been modified" }
+    ```
+  </Accordion>
+  <Accordion title="400 - Blockhash expired">
+    ```json
+    { "error": "Invalid transaction: blockhash is expired. Please create a new transaction." }
+    ```
+  </Accordion>
+  <Accordion title="404 - Proposal not found">
+    ```json
+    {
+      "error": "Proposal not found on-chain",
+      "details": "Account not found..."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Complete Example
+
+```javascript
+import { Transaction } from '@solana/web3.js';
+import bs58 from 'bs58';
+
+async function depositTokens(proposalPda, wallet, vaultType, amount, signTransaction) {
+  // 1. Build the deposit transaction
+  const buildRes = await fetch(
+    `${API_URL}/dao/proposal/${proposalPda}/deposit/build`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet, vaultType, amount })
+    }
+  );
+  const { requestId, transaction } = await buildRes.json();
+
+  // 2. Decode and sign
+  const tx = Transaction.from(bs58.decode(transaction));
+  const signedTx = await signTransaction(tx);
+
+  // 3. Execute
+  const execRes = await fetch(
+    `${API_URL}/dao/proposal/${proposalPda}/deposit/execute`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requestId,
+        signedTransaction: bs58.encode(signedTx.serialize())
+      })
+    }
+  );
+
+  return execRes.json();
+}
+```
+
+---
+
+## Vault Types
+
+| Type | Token | Use Case |
+|------|-------|----------|
+| `base` | DAO's native token (e.g., ZC) | Trading the base asset |
+| `quote` | Quote currency (e.g., SOL) | Trading the quote asset |
+
+---
+
+## Opening a Position
+
+After depositing, you can trade your conditional tokens to take a position:
+
+```javascript
+// 1. Deposit 100 ZC to get 100 pass-ZC + 100 fail-ZC
+await depositTokens(proposalPda, wallet, 'base', '100000000000', signTransaction);
+
+// 2. Swap fail-ZC for pass-ZC in the fail market
+// Now you have ~200 pass-ZC and 0 fail-ZC
+
+// 3. If proposal passes, redeem pass-ZC for ~200 ZC
+// Net profit if pass price was < 0.5
+```
+
+---
+
+## Notes
+
+- Conditional token accounts are automatically created if needed
+- The transaction includes any necessary ATA creation instructions
+- You must have sufficient regular tokens before depositing
+- Check your new balances with the [balances endpoint](/api-reference/trading/balances)

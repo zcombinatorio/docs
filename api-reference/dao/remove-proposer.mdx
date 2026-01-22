@@ -1,0 +1,155 @@
+---
+title: "Remove Proposer"
+description: "DELETE /dao/:daoPda/proposers/:proposerWallet - Remove a wallet from the proposer whitelist"
+---
+
+## Overview
+
+Removes a wallet address from the DAO's proposer whitelist. The wallet will no longer be able to create proposals unless they meet the token threshold requirement.
+
+<CodeGroup>
+
+```bash curl
+curl -X DELETE https://api.zcombinator.io/dao/Dao1xgp...ABC/proposers/ProposerWallet1xgp...XYZ \
+  -H "Content-Type: application/json" \
+  -H "x-wallet-address: YOUR_WALLET" \
+  -H "x-signature: YOUR_SIGNATURE" \
+  -H "x-timestamp: 1736789200" \
+  -d '{
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+  }'
+```
+
+```javascript fetch
+const daoPda = 'Dao1xgp...ABC';
+const proposerWallet = 'ProposerWallet1xgp...XYZ';
+
+const response = await fetch(
+  `https://api.zcombinator.io/dao/${daoPda}/proposers/${proposerWallet}`,
+  {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-wallet-address': walletAddress,
+      'x-signature': signature,
+      'x-timestamp': timestamp
+    },
+    body: JSON.stringify({
+      wallet: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'
+    })
+  }
+);
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+dao_pda = "Dao1xgp...ABC"
+proposer_wallet = "ProposerWallet1xgp...XYZ"
+
+data = {
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+}
+
+response = requests.delete(
+    f'https://api.zcombinator.io/dao/{dao_pda}/proposers/{proposer_wallet}',
+    json=data,
+    headers={
+        'Content-Type': 'application/json',
+        'x-wallet-address': wallet_address,
+        'x-signature': signature,
+        'x-timestamp': timestamp
+    }
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="daoPda" type="string" required>
+  The DAO's Program Derived Address
+</ParamField>
+
+<ParamField path="proposerWallet" type="string" required>
+  The wallet address to remove from the whitelist
+</ParamField>
+
+## Request Parameters
+
+<ParamField body="wallet" type="string" required>
+  The DAO owner's wallet address (must match x-wallet-address header)
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Whether the operation succeeded
+</ResponseField>
+
+<ResponseField name="removed_wallet" type="string">
+  The wallet address that was removed
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "removed_wallet": "ProposerWallet1xgp...XYZ"
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid DAO PDA">
+    ```json
+    {
+      "error": "Invalid DAO PDA"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Proposer Wallet">
+    ```json
+    {
+      "error": "Invalid proposer wallet"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="403 - Not DAO Owner">
+    ```json
+    {
+      "error": "Only the DAO owner can manage proposers"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - DAO Not Found">
+    ```json
+    {
+      "error": "DAO not found"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - Proposer Not Found">
+    ```json
+    {
+      "error": "Proposer not found in whitelist"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Notes
+
+- Removing the DAO owner from the whitelist is allowed but not recommended
+- If the removed wallet holds enough tokens to meet the threshold, they can still create proposals
+- Active proposals created by a removed proposer are not affected

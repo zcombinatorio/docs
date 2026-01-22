@@ -1,0 +1,176 @@
+---
+title: "Set Withdrawal Percentage"
+description: "PUT /dao/:daoPda/withdrawal-percentage - Configure the liquidity withdrawal percentage for proposals"
+---
+
+## Overview
+
+Sets the percentage of liquidity withdrawn from the Meteora pool when a futarchy proposal is created. This liquidity is used to seed the futarchy AMMs.
+
+<CodeGroup>
+
+```bash curl
+curl -X PUT https://api.zcombinator.io/dao/Dao1xgp...ABC/withdrawal-percentage \
+  -H "Content-Type: application/json" \
+  -H "x-wallet-address: YOUR_WALLET" \
+  -H "x-signature: YOUR_SIGNATURE" \
+  -H "x-timestamp: 1736789200" \
+  -d '{
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "percentage": 15
+  }'
+```
+
+```javascript fetch
+const daoPda = 'Dao1xgp...ABC';
+
+const response = await fetch(
+  `https://api.zcombinator.io/dao/${daoPda}/withdrawal-percentage`,
+  {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-wallet-address': walletAddress,
+      'x-signature': signature,
+      'x-timestamp': timestamp
+    },
+    body: JSON.stringify({
+      wallet: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
+      percentage: 15
+    })
+  }
+);
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+dao_pda = "Dao1xgp...ABC"
+
+data = {
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "percentage": 15
+}
+
+response = requests.put(
+    f'https://api.zcombinator.io/dao/{dao_pda}/withdrawal-percentage',
+    json=data,
+    headers={
+        'Content-Type': 'application/json',
+        'x-wallet-address': wallet_address,
+        'x-signature': signature,
+        'x-timestamp': timestamp
+    }
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="daoPda" type="string" required>
+  The DAO's Program Derived Address
+</ParamField>
+
+## Request Parameters
+
+<ParamField body="wallet" type="string" required>
+  The DAO owner's wallet address (must match x-wallet-address header)
+</ParamField>
+
+<ParamField body="percentage" type="number" required>
+  The withdrawal percentage (integer between 5 and 50)
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Whether the operation succeeded
+</ResponseField>
+
+<ResponseField name="dao_pda" type="string">
+  The DAO's Program Derived Address
+</ResponseField>
+
+<ResponseField name="dao_name" type="string">
+  The DAO's name
+</ResponseField>
+
+<ResponseField name="withdrawal_percentage" type="number">
+  The new withdrawal percentage
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "dao_pda": "Dao1xgp...ABC",
+  "dao_name": "MyDAO",
+  "withdrawal_percentage": 15
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid DAO PDA">
+    ```json
+    {
+      "error": "Invalid DAO PDA"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Percentage">
+    ```json
+    {
+      "error": "Invalid withdrawal percentage",
+      "details": "Percentage must be an integer between 5 and 50"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="403 - Not DAO Owner">
+    ```json
+    {
+      "error": "Only the DAO owner can update the withdrawal percentage"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - DAO Not Found">
+    ```json
+    {
+      "error": "DAO not found"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## How Withdrawal Percentage Works
+
+When a futarchy proposal is launched:
+
+1. The configured percentage of liquidity is withdrawn from the Meteora pool
+2. This liquidity seeds the Pass and Fail conditional token AMMs
+3. After the proposal finalizes, liquidity is returned to the Meteora pool
+
+<Info>
+**Default:** 12%
+
+Higher percentages provide deeper liquidity for futarchy trading but temporarily reduce main pool liquidity.
+</Info>
+
+## Percentage Guidelines
+
+| Percentage | Use Case |
+| :--- | :--- |
+| 5-10% | Low-impact proposals, smaller pools |
+| 10-20% | Standard proposals, balanced approach |
+| 20-35% | High-stakes decisions, larger pools |
+| 35-50% | Maximum market depth, very large pools |

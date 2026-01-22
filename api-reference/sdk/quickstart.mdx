@@ -1,0 +1,255 @@
+---
+title: "Quickstart"
+description: "Build your first futarchy transaction with the SDK"
+---
+
+## Setup
+
+First, initialize the client:
+
+```typescript
+import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import { AnchorProvider, Wallet, BN } from '@coral-xyz/anchor';
+import { futarchy, VaultType } from '@zcomb/programs-sdk';
+
+// Setup connection and wallet
+const connection = new Connection('https://api.mainnet-beta.solana.com');
+const wallet = new Wallet(Keypair.generate()); // Use your actual wallet
+
+const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
+const client = new futarchy.FutarchyClient(provider);
+```
+
+## Fetch Proposal Data
+
+```typescript
+const proposalPda = new PublicKey('YOUR_PROPOSAL_PDA');
+
+// Fetch proposal
+const proposal = await client.fetchProposal(proposalPda);
+
+// Parse state
+const { state, winningIdx } = futarchy.parseProposalState(proposal.state);
+console.log('Proposal state:', state);
+console.log('Winning index:', winningIdx);
+
+// Access proposal properties
+console.log('Number of options:', proposal.numOptions);
+console.log('Vault:', proposal.vault.toBase58());
+console.log('Pools:', proposal.pools.map(p => p.toBase58()));
+```
+
+## Fetch User Balances
+
+```typescript
+const userPubkey = wallet.publicKey;
+const vaultPda = proposal.vault;
+
+// Fetch balances for base vault
+const baseBalances = await client.vault.fetchUserBalances(
+  vaultPda,
+  userPubkey,
+  VaultType.Base
+);
+
+console.log('Regular balance:', baseBalances.userBalance.toString());
+console.log('Conditional balances:', baseBalances.condBalances.map(b => b.toString()));
+```
+
+## Get Swap Quote
+
+```typescript
+const poolPda = proposal.pools[0]; // Pass market
+const inputAmount = new BN('1000000000'); // 1 token (9 decimals)
+const swapAToB = true; // Quote -> Conditional
+
+const quote = await client.amm.quote(poolPda, swapAToB, inputAmount);
+
+console.log('Input:', quote.inputAmount.toString());
+console.log('Output:', quote.outputAmount.toString());
+console.log('Min output:', quote.minOutputAmount.toString());
+console.log('Price impact:', quote.priceImpact);
+```
+
+## Execute a Swap
+
+```typescript
+// Build swap with slippage protection
+const slippagePercent = 2; // 2%
+const { builder, quote } = await client.amm.swapWithSlippage(
+  userPubkey,
+  poolPda,
+  swapAToB,
+  inputAmount,
+  slippagePercent,
+  { autoCreateTokenAccounts: true }
+);
+
+// Build and send transaction
+const tx = await builder.transaction();
+const { blockhash } = await connection.getLatestBlockhash();
+tx.recentBlockhash = blockhash;
+tx.feePayer = userPubkey;
+
+// Sign (in browser, use wallet adapter)
+const signedTx = await wallet.signTransaction(tx);
+
+// Send
+const signature = await connection.sendRawTransaction(signedTx.serialize());
+await connection.confirmTransaction(signature);
+
+console.log('Swap executed:', signature);
+```
+
+## Deposit Tokens (Split)
+
+```typescript
+const depositAmount = new BN('10000000000'); // 10 tokens
+
+// Build deposit transaction
+const builder = await client.vault.deposit(
+  userPubkey,
+  vaultPda,
+  VaultType.Base,
+  depositAmount
+);
+
+const tx = await builder.transaction();
+tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+tx.feePayer = userPubkey;
+
+const signedTx = await wallet.signTransaction(tx);
+const signature = await connection.sendRawTransaction(signedTx.serialize());
+
+console.log('Deposit executed:', signature);
+// You now have equal pass and fail tokens
+```
+
+## Withdraw Tokens (Merge)
+
+```typescript
+const withdrawAmount = new BN('5000000000'); // 5 tokens
+
+// Build withdraw transaction
+const builder = await client.vault.withdraw(
+  userPubkey,
+  vaultPda,
+  VaultType.Base,
+  withdrawAmount
+);
+
+const tx = await builder.transaction();
+tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+tx.feePayer = userPubkey;
+
+const signedTx = await wallet.signTransaction(tx);
+const signature = await connection.sendRawTransaction(signedTx.serialize());
+
+console.log('Withdraw executed:', signature);
+```
+
+## Redeem Winnings
+
+```typescript
+// Only works after proposal is resolved
+const { state } = futarchy.parseProposalState(proposal.state);
+if (state !== 'resolved') {
+  throw new Error('Proposal not yet resolved');
+}
+
+// Build redeem transaction
+const builder = await client.vault.redeemWinnings(
+  userPubkey,
+  vaultPda,
+  VaultType.Base
+);
+
+const tx = await builder.transaction();
+tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+tx.feePayer = userPubkey;
+
+const signedTx = await wallet.signTransaction(tx);
+const signature = await connection.sendRawTransaction(signedTx.serialize());
+
+console.log('Redemption executed:', signature);
+```
+
+## Complete Trading Example
+
+```typescript
+async function openLongPassPosition(
+  client: futarchy.FutarchyClient,
+  connection: Connection,
+  wallet: Wallet,
+  proposalPda: PublicKey,
+  amount: BN
+) {
+  const proposal = await client.fetchProposal(proposalPda);
+  const vaultPda = proposal.vault;
+  const passPool = proposal.pools[0];
+  const failPool = proposal.pools[1];
+
+  // 1. Deposit to get conditional tokens
+  console.log('Depositing tokens...');
+  const depositBuilder = await client.vault.deposit(
+    wallet.publicKey,
+    vaultPda,
+    VaultType.Base,
+    amount
+  );
+  let tx = await depositBuilder.transaction();
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  tx.feePayer = wallet.publicKey;
+  let signed = await wallet.signTransaction(tx);
+  await connection.sendRawTransaction(signed.serialize());
+
+  // 2. Swap fail tokens for pass tokens in fail market
+  // This gives us more pass tokens, going long on pass
+  console.log('Swapping fail for pass...');
+  const halfAmount = amount.div(new BN(2));
+  const { builder: swapBuilder } = await client.amm.swapWithSlippage(
+    wallet.publicKey,
+    failPool,
+    false, // Conditional (fail) -> Quote
+    halfAmount,
+    2 // 2% slippage
+  );
+
+  tx = await swapBuilder.transaction();
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  tx.feePayer = wallet.publicKey;
+  signed = await wallet.signTransaction(tx);
+  await connection.sendRawTransaction(signed.serialize());
+
+  // 3. Check final position
+  const balances = await client.vault.fetchUserBalances(
+    vaultPda,
+    wallet.publicKey,
+    VaultType.Base
+  );
+
+  console.log('Position opened:');
+  console.log('Pass tokens:', balances.condBalances[0].toString());
+  console.log('Fail tokens:', balances.condBalances[1].toString());
+}
+```
+
+## Error Handling
+
+```typescript
+try {
+  const proposal = await client.fetchProposal(proposalPda);
+} catch (error) {
+  if (error.message?.includes('Account does not exist')) {
+    console.error('Proposal not found');
+  } else {
+    console.error('Unexpected error:', error);
+  }
+}
+```
+
+## Next Steps
+
+- Explore the [Trading API](/api-reference/trading/overview) for a simpler integration
+- Check [Market Status](/api-reference/trading/market-status) for proposal data
+- See [User Balances](/api-reference/trading/balances) for position tracking

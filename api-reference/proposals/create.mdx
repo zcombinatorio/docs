@@ -1,0 +1,218 @@
+---
+title: "Create Proposal"
+description: "POST /dao/proposal - Launch a new futarchy proposal"
+---
+
+## Overview
+
+Creates a new futarchy proposal for a DAO. The proposal automatically withdraws liquidity from the Meteora pool to seed the futarchy AMMs. Only authorized proposers (whitelisted or meeting token threshold) can create proposals.
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://api.zcombinator.io/dao/proposal \
+  -H "Content-Type: application/json" \
+  -H "x-wallet-address: YOUR_WALLET" \
+  -H "x-signature: YOUR_SIGNATURE" \
+  -H "x-timestamp: 1736789200" \
+  -d '{
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "dao_pda": "Dao1xgp...ABC",
+    "title": "Should we increase staking rewards?",
+    "description": "Proposal to increase staking APY from 5% to 8%",
+    "length_secs": 86400,
+    "warmup_secs": 3600,
+    "options": ["No", "Yes"]
+  }'
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/dao/proposal', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-wallet-address': walletAddress,
+    'x-signature': signature,
+    'x-timestamp': timestamp
+  },
+  body: JSON.stringify({
+    wallet: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
+    dao_pda: 'Dao1xgp...ABC',
+    title: 'Should we increase staking rewards?',
+    description: 'Proposal to increase staking APY from 5% to 8%',
+    length_secs: 86400,
+    warmup_secs: 3600,
+    options: ['No', 'Yes']
+  })
+});
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+data = {
+    "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "dao_pda": "Dao1xgp...ABC",
+    "title": "Should we increase staking rewards?",
+    "description": "Proposal to increase staking APY from 5% to 8%",
+    "length_secs": 86400,
+    "warmup_secs": 3600,
+    "options": ["No", "Yes"]
+}
+
+response = requests.post(
+    'https://api.zcombinator.io/dao/proposal',
+    json=data,
+    headers={
+        'Content-Type': 'application/json',
+        'x-wallet-address': wallet_address,
+        'x-signature': signature,
+        'x-timestamp': timestamp
+    }
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField body="wallet" type="string" required>
+  The proposer's wallet address (must match x-wallet-address header)
+</ParamField>
+
+<ParamField body="dao_pda" type="string" required>
+  The DAO's Program Derived Address
+</ParamField>
+
+<ParamField body="title" type="string" required>
+  Proposal title (max 128 characters)
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Detailed proposal description (max 1024 characters)
+</ParamField>
+
+<ParamField body="length_secs" type="number" required>
+  Duration of the market in seconds. Duration limits depend on proposer role:
+  - **DAO Owner**: 1 minute to 7 days (60 - 604800 seconds)
+  - **Other Proposers**: 24 hours to 4 days (86400 - 345600 seconds)
+</ParamField>
+
+<ParamField body="warmup_secs" type="number" required>
+  Warmup period before TWAP tracking begins (max 80% of length_secs)
+</ParamField>
+
+<ParamField body="options" type="string[]" required>
+  Array of 2-6 option labels (e.g., `["No", "Yes"]` or `["0%", "10%", "20%", "30%"]`)
+</ParamField>
+
+## Response
+
+<ResponseField name="proposal_pda" type="string">
+  The on-chain Proposal Program Derived Address
+</ResponseField>
+
+<ResponseField name="proposal_id" type="number">
+  The proposal ID within the DAO's moderator
+</ResponseField>
+
+<ResponseField name="metadata_cid" type="string">
+  IPFS CID for proposal metadata
+</ResponseField>
+
+<ResponseField name="dao_pda" type="string">
+  The DAO's Program Derived Address
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status (always "pending")
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "proposal_pda": "Prop1xgp...ABC",
+  "proposal_id": 1,
+  "metadata_cid": "QmXyz...",
+  "dao_pda": "Dao1xgp...ABC",
+  "status": "pending"
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing Required Fields">
+    ```json
+    {
+      "error": "Missing required fields: dao_pda, title, description, length_secs, warmup_secs, options"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Duration">
+    ```json
+    {
+      "error": "Invalid proposal duration",
+      "reason": "Proposers can create proposals from 24 hours to 4 days (86400-345600 seconds)",
+      "provided": 3600
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Active Proposal Exists">
+    ```json
+    {
+      "error": "DAO not ready for proposals",
+      "reason": "Active proposal already exists for this moderator",
+      "check": "active_proposal"
+    }
+    ```
+
+    Only one proposal can be active per DAO at a time.
+  </Accordion>
+
+  <Accordion title="403 - Not Authorized">
+    ```json
+    {
+      "error": "Not authorized to propose",
+      "reason": "Wallet not whitelisted and does not meet token threshold",
+      "check": "proposer_authorization"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - DAO Not Found">
+    ```json
+    {
+      "error": "DAO not found"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Proposal Lifecycle
+
+After creating a proposal:
+
+1. **Trading Period**: Users can trade conditional tokens until `length_secs` elapses
+2. **Finalize**: Call [Finalize Proposal](/api-reference/proposals/finalize) to resolve the outcome
+3. **Redeem**: Call [Redeem Liquidity](/api-reference/proposals/redeem-liquidity) to withdraw liquidity
+4. **Deposit Back**: Call [Deposit Back](/api-reference/proposals/deposit-back) to return liquidity to Meteora
+
+## Multi-Option Markets
+
+You can create markets with up to 6 options:
+
+```json
+{
+  "options": ["0%", "5%", "10%", "15%", "20%", "25%"]
+}
+```
+
+The winning option is determined by the highest TWAP (Time-Weighted Average Price) at finalization.

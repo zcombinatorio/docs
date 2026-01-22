@@ -1,0 +1,84 @@
+---
+title: "DAO Management Overview"
+description: "Create and configure DAOs with futarchy"
+---
+
+## Overview
+
+The DAO Management API allows you to create DAOs, manage proposer access, and configure market parameters.
+
+## What is a DAO?
+
+In the context of futarchy, a **DAO** (Decentralized Autonomous Organization) is not a traditional governance structure—it's a **container that connects your token's liquidity pool to the futarchy system**.
+
+When you create a DAO, you're essentially:
+1. **Linking a Meteora liquidity pool** to the futarchy system
+2. **Enabling futarchies** that can temporarily withdraw liquidity to seed trading
+3. **Defining who can create proposals** (markets) for your community
+
+Think of a DAO as the bridge between your token's existing liquidity and the futarchy infrastructure. Each DAO has its own proposer whitelist, token threshold settings, and configuration for how much liquidity to use when launching markets.
+
+## DAO Types
+
+<CardGroup cols={2}>
+  <Card title="Parent DAO" icon="building">
+    The primary DAO that owns a liquidity pool. Parent DAOs:
+    - Create their own Meteora liquidity pool reference
+    - Can spawn child DAOs
+    - Control the shared pool configuration
+  </Card>
+  <Card title="Child DAO" icon="sitemap">
+    DAOs created under a parent that share the same pool. Child DAOs:
+    - Inherit the parent's liquidity pool
+    - Have independent proposer whitelists
+    - Can run their own futarchies
+  </Card>
+</CardGroup>
+
+## Authentication
+
+All DAO management endpoints require signed hash authentication. You must include:
+
+<ParamField header="x-wallet-address" type="string" required>
+  The wallet address performing the action
+</ParamField>
+
+<ParamField header="x-signature" type="string" required>
+  Ed25519 signature of the request hash
+</ParamField>
+
+<ParamField header="x-timestamp" type="string" required>
+  Unix timestamp (must be within 5 minutes)
+</ParamField>
+
+## Base URL
+
+```
+https://api.zcombinator.io
+```
+
+## Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/dao/parent` | Create a parent DAO |
+| POST | `/dao/child` | Create a child DAO |
+| POST | `/dao/:daoPda/proposers` | Add a proposer to whitelist |
+| DELETE | `/dao/:daoPda/proposers/:wallet` | Remove a proposer |
+| PUT | `/dao/:daoPda/proposer-threshold` | Set token holding threshold |
+| PUT | `/dao/:daoPda/withdrawal-percentage` | Set liquidity withdrawal % |
+
+## Proposer Authorization
+
+DAOs support two methods for authorizing proposal creation:
+
+<AccordionGroup>
+  <Accordion title="Whitelist">
+    Explicitly add wallet addresses to the proposer whitelist. The DAO owner can add or remove proposers at any time.
+  </Accordion>
+  <Accordion title="Token Threshold">
+    Allow any wallet holding at least X tokens to create proposals. Set the threshold to `null` or `0` to disable.
+  </Accordion>
+</AccordionGroup>
+
+A wallet can create proposals if they satisfy **either** condition (whitelist OR token threshold).

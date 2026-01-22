@@ -1,0 +1,248 @@
+---
+title: "Create Fee Claim Transaction"
+description: "POST /fee-claim/claim - Create unsigned transaction for claiming Meteora DAMM v2 pool fees"
+---
+
+## Overview
+
+Creates an unsigned transaction for claiming accumulated fees from a Meteora DAMM v2 (Dynamic AMM) pool. The API validates available fees, builds a transaction that claims fees and transfers them to the configured destination address, and returns the transaction ready for user signing.
+
+<Note>
+This endpoint only claims fees from the **first position** in the pool to keep transaction size manageable. If multiple positions exist, subsequent calls are needed to claim from other positions.
+</Note>
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://api.zcombinator.io/fee-claim/claim \
+  -H "Content-Type: application/json" \
+  -d '{
+    "payerPublicKey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+  }'
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/fee-claim/claim', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    payerPublicKey: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+  })
+});
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+data = {
+    "payerPublicKey": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+}
+
+response = requests.post(
+    'https://api.zcombinator.io/fee-claim/claim',
+    json=data,
+    headers={'Content-Type': 'application/json'}
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField body="payerPublicKey" type="string" required>
+  Base58 encoded public key of the wallet that will pay transaction fees. This wallet only covers network transaction costs and cannot redirect claimed fees.
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the operation was successful
+</ResponseField>
+
+<ResponseField name="transaction" type="string">
+  Base58 encoded unsigned transaction that needs to be signed by the fee payer
+</ResponseField>
+
+<ResponseField name="requestId" type="string">
+  Unique identifier for this fee claim request (needed for confirmation)
+</ResponseField>
+
+<ResponseField name="poolAddress" type="string">
+  Address of the Meteora DAMM v2 pool
+</ResponseField>
+
+<ResponseField name="tokenAMint" type="string">
+  Mint address of Token A in the pool
+</ResponseField>
+
+<ResponseField name="tokenBMint" type="string">
+  Mint address of Token B in the pool
+</ResponseField>
+
+<ResponseField name="isTokenBNativeSOL" type="boolean">
+  Whether Token B is native SOL (unwrapped after claim)
+</ResponseField>
+
+<ResponseField name="totalPositions" type="number">
+  Total number of positions owned by the LP owner in this pool
+</ResponseField>
+
+<ResponseField name="claimingPosition" type="number">
+  Position number being claimed (always 1 for this endpoint)
+</ResponseField>
+
+<ResponseField name="estimatedFees" type="object">
+  Object containing fee estimates
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Instructions for the next step in the process
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "transaction": "4MzR7dxJNJRVP1Q6k7Y3j8X...",
+  "requestId": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "poolAddress": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+  "tokenAMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "tokenBMint": "So11111111111111111111111111111111111111112",
+  "isTokenBNativeSOL": true,
+  "totalPositions": 3,
+  "claimingPosition": 1,
+  "instructionsCount": 8,
+  "estimatedFees": {
+    "tokenA": "1000000",
+    "tokenB": "500000000"
+  },
+  "message": "Sign this transaction and submit to /fee-claim/confirm (Token B will be transferred as native SOL)"
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing Parameters">
+    ```json
+    {
+      "error": "Missing required field: payerPublicKey"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Public Key">
+    ```json
+    {
+      "error": "Invalid payerPublicKey format"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - No Positions Found">
+    ```json
+    {
+      "error": "No positions found for the LP owner in this pool"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - No Fees Available">
+    ```json
+    {
+      "error": "No fees available to claim"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="500 - Configuration Error">
+    ```json
+    {
+      "error": "Server configuration incomplete. Missing required environment variables."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Process Flow
+
+<Steps>
+<Step title="Validate Parameters">
+Ensures payerPublicKey is provided and is a valid Solana address
+</Step>
+
+<Step title="Validate Environment">
+Checks required environment variables are configured
+</Step>
+
+<Step title="Fetch Pool State">
+Retrieves the current state of the Meteora DAMM v2 pool
+</Step>
+
+<Step title="Get User Positions">
+Fetches all LP positions owned by the protocol wallet
+</Step>
+
+<Step title="Calculate Unclaimed Fees">
+Uses Meteora SDK to calculate accurate unclaimed fees
+</Step>
+
+<Step title="Build Combined Transaction">
+Creates a transaction with ATA creation, fee claim, and transfer instructions
+</Step>
+
+<Step title="Handle Native SOL">
+If Token B is wrapped SOL, includes native SOL transfer logic
+</Step>
+
+<Step title="Return Unsigned Transaction">
+Returns the Base58 encoded transaction for user signing
+</Step>
+</Steps>
+
+## Fee Structure
+
+Combinator takes a **0.5% protocol fee** on trading volume. This fee accumulates in the pool and can be claimed via this endpoint. LP fees are separate and configurable by the DAO creator.
+
+## Native SOL Handling
+
+<Info>
+**Special handling for wrapped SOL (wSOL)**:
+
+When Token B is the native SOL mint:
+1. Meteora automatically unwraps wSOL to native SOL during the claim
+2. No token account is created for Token B
+3. The transfer uses `SystemProgram.transfer` instead of SPL token transfer
+4. Fees are received directly as native SOL in the wallet
+</Info>
+
+## Rate Limiting
+
+This endpoint is subject to rate limiting:
+- **10 requests** per 5-minute window per IP
+- Returns HTTP 429 when limit exceeded
+
+## Security Considerations
+
+<Warning>
+**No authorization required**:
+- Fee destinations are hardcoded in environment variables
+- Transaction validation ensures funds can ONLY go to configured addresses
+- Fee payer only covers transaction costs, cannot redirect fees
+- This allows anyone to trigger fee claims for the protocol
+</Warning>
+
+## Next Steps
+
+After receiving the unsigned transaction:
+
+1. **Deserialize** the transaction using `@solana/web3.js`
+2. **Sign** the transaction with your wallet (fee payer)
+3. **Submit** the signed transaction to [Confirm Fee Claim](/api-reference/fee-claim/confirm)

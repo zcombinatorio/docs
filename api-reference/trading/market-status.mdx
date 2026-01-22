@@ -48,7 +48,7 @@ data = response.json()
 </ResponseField>
 
 <ResponseField name="numOptions" type="number">
-  Number of options in the proposal (typically 2 for pass/fail)
+  Number of outcome options in the proposal
 </ResponseField>
 
 <ResponseField name="pools" type="array">
@@ -66,7 +66,7 @@ data = response.json()
 ### Pool Object
 
 <ResponseField name="pools[].index" type="number">
-  Pool index (0 = pass, 1 = fail)
+  Pool index (corresponds to outcome option)
 </ResponseField>
 
 <ResponseField name="pools[].poolPda" type="string">
@@ -183,4 +183,4 @@ The TWAP (Time-Weighted Average Price) is calculated by the on-chain oracle over
 - **Leading option** = The outcome with the highest current TWAP
 - **Warmup period** = Oracle must run for a minimum time before TWAP is valid
 
-The winning outcome is determined by comparing the pass TWAP vs fail TWAP at proposal finalization.
+The winning outcome is determined by comparing the TWAP values across all outcome options at proposal finalization.

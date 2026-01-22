@@ -63,12 +63,15 @@ Each proposal has two vault types for conditional tokens:
 
 ## Pool Indices
 
-Binary proposals have two pools:
+Each proposal has one pool per outcome option. The number of pools depends on how many options the proposal creator defined.
 
-| Index | Outcome | Meaning |
-|-------|---------|---------|
-| `0` | Pass | Proposal passes |
-| `1` | Fail | Proposal fails |
+| Index | Outcome |
+|-------|---------|
+| `0` | First option |
+| `1` | Second option |
+| `n` | nth option |
+
+Use the [Market Status](/api-reference/trading/market-status) endpoint to see how many options a proposal has (`numOptions`).
 
 ## Error Handling
 

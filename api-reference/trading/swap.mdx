@@ -5,7 +5,7 @@ description: "Trade conditional tokens in proposal AMM pools"
 
 ## Overview
 
-Execute swaps in a proposal's AMM pools to trade conditional tokens. Each proposal has two pools (pass and fail markets) where you can trade conditional tokens.
+Execute swaps in a proposal's AMM pools to trade conditional tokens. Each proposal has one pool per outcome option where you can trade conditional tokens.
 
 This is a two-step process:
 1. **Build** - Request an unsigned transaction from the API
@@ -78,7 +78,7 @@ data = response.json()
 </ParamField>
 
 <ParamField body="poolIndex" type="number" required>
-  The pool index to swap in (0 = pass market, 1 = fail market)
+  The pool index to swap in (corresponds to outcome option index)
 </ParamField>
 
 <ParamField body="swapAToB" type="boolean" required>

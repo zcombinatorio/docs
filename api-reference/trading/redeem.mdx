@@ -9,8 +9,7 @@ Redeem winning conditional tokens back to regular tokens after a proposal has re
 
 | Winning Outcome | Redeemable Token | Value |
 |-----------------|------------------|-------|
-| Pass | Pass tokens | 1:1 for regular |
-| Fail | Fail tokens | 1:1 for regular |
+| Outcome n | Outcome-n tokens | 1:1 for regular |
 
 This is a two-step process:
 1. **Build** - Request an unsigned transaction from the API
@@ -104,7 +103,7 @@ data = response.json()
 </ResponseField>
 
 <ResponseField name="winningIndex" type="number">
-  The index of the winning outcome (0 = pass, 1 = fail)
+  The index of the winning outcome (corresponds to outcome option)
 </ResponseField>
 
 ```json
@@ -269,7 +268,7 @@ async function redeemWinnings(proposalPda, wallet, vaultType, signTransaction) {
   );
   const { requestId, transaction, winningIndex } = await buildRes.json();
 
-  console.log(`Redeeming tokens. Winning outcome: ${winningIndex === 0 ? 'Pass' : 'Fail'}`);
+  console.log(`Redeeming tokens. Winning outcome index: ${winningIndex}`);
 
   // 2. Decode and sign
   const tx = Transaction.from(bs58.decode(transaction));
@@ -296,25 +295,27 @@ async function redeemWinnings(proposalPda, wallet, vaultType, signTransaction) {
 
 ## Example Scenarios
 
-**Scenario 1: You held pass tokens, proposal passed**
+These examples assume a proposal with 2 outcome options.
+
+**Scenario 1: You held outcome-0 tokens, outcome 0 won**
 ```
-Before: 100 pass-ZC, 0 fail-ZC
-Redeem: 100 pass-ZC → 100 ZC
+Before: 100 outcome-0-ZC, 0 outcome-1-ZC
+Redeem: 100 outcome-0-ZC → 100 ZC
 After: 100 ZC
 ```
 
-**Scenario 2: You held pass tokens, proposal failed**
+**Scenario 2: You held outcome-0 tokens, outcome 1 won**
 ```
-Before: 100 pass-ZC, 0 fail-ZC
-Result: Pass tokens are worthless
+Before: 100 outcome-0-ZC, 0 outcome-1-ZC
+Result: Outcome-0 tokens are worthless
 After: 0 ZC (loss)
 ```
 
 **Scenario 3: You held equal positions (hedged)**
 ```
-Before: 50 pass-ZC, 50 fail-ZC
-Proposal passes: Redeem 50 pass-ZC → 50 ZC
-Lose: 50 fail-ZC (worthless)
+Before: 50 outcome-0-ZC, 50 outcome-1-ZC
+Outcome 0 wins: Redeem 50 outcome-0-ZC → 50 ZC
+Lose: 50 outcome-1-ZC (worthless)
 After: 50 ZC
 ```
 

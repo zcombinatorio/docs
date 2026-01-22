@@ -5,13 +5,13 @@ description: "Split regular tokens into conditional tokens for trading"
 
 ## Overview
 
-Deposit (split) regular tokens into conditional tokens to participate in futarchy. When you deposit, your tokens are split equally into pass and fail conditional tokens.
+Deposit (split) regular tokens into conditional tokens to participate in futarchy. When you deposit, your tokens are split equally into conditional tokens for each outcome option.
 
 ```
-1 regular token → 1 pass token + 1 fail token
+1 regular token → 1 conditional token per outcome
 ```
 
-For example, depositing 100 ZC gives you 100 pass-ZC and 100 fail-ZC.
+For example, depositing 100 ZC into a proposal with 2 outcomes gives you 100 conditional tokens for each outcome.
 
 This is a two-step process:
 1. **Build** - Request an unsigned transaction from the API
@@ -310,14 +310,15 @@ async function depositTokens(proposalPda, wallet, vaultType, amount, signTransac
 After depositing, you can trade your conditional tokens to take a position:
 
 ```javascript
-// 1. Deposit 100 ZC to get 100 pass-ZC + 100 fail-ZC
+// Example with a binary (2 outcome) proposal:
+// 1. Deposit 100 ZC to get 100 tokens for each outcome
 await depositTokens(proposalPda, wallet, 'base', '100000000000', signTransaction);
 
-// 2. Swap fail-ZC for pass-ZC in the fail market
-// Now you have ~200 pass-ZC and 0 fail-ZC
+// 2. Swap outcome-1 tokens for outcome-0 tokens
+// Now you have ~200 outcome-0 tokens and 0 outcome-1 tokens
 
-// 3. If proposal passes, redeem pass-ZC for ~200 ZC
-// Net profit if pass price was < 0.5
+// 3. If outcome 0 wins, redeem for ~200 ZC
+// Net profit if outcome-0 price was < 0.5
 ```
 
 ---

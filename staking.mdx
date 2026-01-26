@@ -4,49 +4,144 @@ title: "ZC Staking"
 
 ## Executive Summary
 
-\$ZC acts as a **Product Token**. It is a license to contribute value to and capture value from the Combinator futarchy infrastructure. The protocol utilizes a novel "Quantum Justice" system where market sentiment determines Staker obligations adherence.
+\$ZC is a **Product Token** — a license to contribute value to and capture value from the Combinator futarchy infrastructure. Stake it for the opportunity to earn a share of protocol revenue based on your trading volume, capped by your stake.
 
 | Parameter | Value |
 | :--- | :--- |
-| **Vault Program ID** | 47rZ1jgK7zU6XAgffAfXkDX1JkiiRi4HRPBytossWR12 |
-| **Fixed Staking Period** | 2 Weeks (1,209,600 seconds) |
-| **Unlock Time** | Jan 12, 2026 @ 12:30 PM EST |
-| **Real Yield Architecture** | Yield is derived from trading fees and slashing. |
-| **Slashing Compliance** | Malicious or inactive stakers are slashed via community-driven futarchy |
+| **Vault Program ID** | GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy |
+| **Volume Window** | 14 days |
+| **Daily Reward Cap** | Staked Amount / 7 |
+| **Unstaking Period** | 7 days |
+| **Distribution** | Daily |
 
 ---
 
-## The Social Contract: Stake-to-Earn & The Obligation
+## The Value Loop
 
-Staking \$ZC is not a passive income strategy; it is a **paid role** within the ecosystem. By staking, you enter a social contract with the protocol:
+100% of protocol revenue goes to buying back \$ZC. This includes trading fees from futarchies and spot swaps on associated tokens (\$ZC, \$SURF, etc.). Every dollar Combinator captures gets absorbed by \$ZC.
+
+This creates a direct feedback loop:
+
+<Steps>
+  <Step title="Stake">
+    You buy and stake \$ZC
+  </Step>
+  <Step title="Trade">
+    You trade futarchies and earn \$ZC
+  </Step>
+  <Step title="Improve">
+    Your trading activity makes Combinator's decisions more accurate
+  </Step>
+  <Step title="Grow">
+    More accurate decisions attract more builders and integrations
+  </Step>
+  <Step title="Revenue">
+    Combinator earns more revenue, which buys back \$ZC
+  </Step>
+  <Step title="Distribute">
+    \$ZC is distributed to active stakers
+  </Step>
+</Steps>
+
+The trading you do as a \$ZC staker directly grows the Combinator network and the value of what you hold.
+
+---
+
+## The Social Contract
+
+Staking \$ZC is not passive income — it's a **paid role** within the ecosystem.
 
 <CardGroup cols={2}>
-  <Card title="The Reward (Yield)" icon="gift">
-    Stakers earn a share of all protocol revenue (trading fees) and 100% of assets seized from slashed participants.
+  <Card title="The Reward" icon="gift">
+    A share of protocol revenue based on your trading volume and capped by your stake, plus assets seized from slashed stakers.
   </Card>
-  <Card title="The Obligation (The Job)" icon="briefcase">
-    To justify this yield, stakers are mandated to actively contribute to the network's vitality.
+  <Card title="The Obligation" icon="briefcase">
+    Active participation — trading futarchies in good faith, deepening liquidity, and policing stakers who aren't contributing.
   </Card>
 </CardGroup>
 
-**Staker Obligations include:**
-
-- Actively trading in good faith across all live markets to deepen liquidity and reveal correct decisions (incl. Combinator, Star, SolPay, SurfCash, etc.)
-- Policing other Stakers and proposing slashing QMs when they slack
-
 <Note>
-Obligations are intentionally qualitative, not rigid. The degree of participation will shift based on the protocol's current needs—determined and enforced by the community through the process below.
+The \$ZC incentive exists because stakers trade and grow Combinator's user base, activity, and revenue. More stakers means more volume and attention on Combinator futarchies, which means more accurate decisions.
 </Note>
 
 ---
 
-## Policing & Enforcement ("Quantum Justice")
+## Mechanics
 
-Adherence to this obligation is not measured by rigid code, but by **peer consensus validated via futarchy**. The community polices itself through the following process:
+### Reward Formula
+
+Your rewards are calculated based on your share of trading volume:
+
+$$
+\text{volume\_share} = \frac{\text{your\_volume}}{\text{total\_volume}}
+$$
+
+$$
+\text{raw\_reward} = \text{fee\_wallet\_balance} \times \text{volume\_share}
+$$
+
+$$
+\text{final\_reward} = \min(\text{raw\_reward}, \text{daily\_cap})
+$$
+
+### Daily Cap (Anti-Gaming)
+
+To prevent gaming where someone stakes a large amount right before distribution:
+
+$$
+\text{daily\_cap} = \frac{\text{staked\_amount}}{7}
+$$
+
+**Example:**
+- Stake 700 ZC = max 100 ZC/day in rewards
+- Stake 7000 ZC = max 1000 ZC/day in rewards
+
+To earn more rewards, you must commit your stake for a longer effective period.
+
+### Delegation
+
+You can link separate trading wallets to your staking position. Volume from delegate wallets counts toward your rewards, useful for separating your staking wallet from your trading wallet.
+
+<Note>
+To set up delegation, contact the team via [Telegram](https://t.me/+Ao05jBnpEE0yZGVh) or [Discord](https://discord.gg/Vf38Mqhxu5).
+</Note>
+
+### Distribution Timing
+
+Rewards are calculated and distributed **daily**.
+
+---
+
+## User Operations
+
+<Steps>
+  <Step title="Stake">
+    Deposit \$ZC into the staking vault. Your tokens are transferred to the reward vault and your staked amount is recorded.
+  </Step>
+  <Step title="Trade">
+    Trade on Combinator futarchies. Your volume over the past 14 days determines your reward share.
+  </Step>
+  <Step title="Initiate Unstake">
+    Request to withdraw your stake. This starts a **7-day waiting period**. You cannot initiate another unstake while one is pending.
+  </Step>
+  <Step title="Withdraw">
+    After 7 days, complete the withdrawal to receive your staked \$ZC back.
+  </Step>
+</Steps>
+
+<Warning>
+Stakers can be slashed at any time between staking and completing withdrawal — including during the 7-day unstaking period.
+</Warning>
+
+---
+
+## Enforcement (Quantum Justice)
+
+Adherence to your obligation is not measured by rigid code, but by **peer consensus validated via futarchy**. The community polices itself:
 
 <Steps>
   <Step title="Accusation">
-    Any user can flag a staker who is "slacking" (collecting yield without contributing) or acting maliciously. Stakers can be tracked at https://combinator.trade/zc/stake. Slashing proposals can be made at https://combinator.trade/zc/create.
+    Any user can flag a staker who is collecting rewards without contributing genuine trading activity. Stakers can be tracked at https://combinator.trade/zc/stake. Slashing proposals can be made at https://combinator.trade/zc/create.
   </Step>
   <Step title="QM Activation">
     The Combinator Team reviews the proposal and launches a specific futarchy (e.g., "How much should we slash Staker [wallet]?").
@@ -55,98 +150,11 @@ Adherence to this obligation is not measured by rigid code, but by **peer consen
     The market actively trades, allowing the community to price the probability and magnitude of the user's guilt based on their on-chain history.
   </Step>
   <Step title="Execution">
-    If the market resolves to a positive slash amount (e.g., "Yes, Slash 20%"), the smart contract automatically seizes that portion of the user's staked position and redistributes it to the remaining compliant stakers as yield.
+    If the market resolves to a positive slash amount, the contract seizes that portion of the user's staked position and redistributes it to active stakers.
   </Step>
 </Steps>
 
----
-
-## Mathematical Models & Accounting
-
-### The "Rain Gauge" Yield Drip Mechanism
-
-To prevent reward manipulation, yield is not injected instantly. It is "drip-fed" over the 2-week staking window.
-
-**Distribution Formula:**
-
-Every second, the vault releases rewards into the primary pool:
-
-$$
-Drip_{sec} = \lfloor \frac{Queued}{Window} \rfloor + \text{remainder\_adjustment}
-$$
-
-<AccordionGroup>
-  <Accordion title="Drip Precision" icon="droplet">
-    Our model ensures 100% of tokens are distributed. If `Queued % Window != 0`, the remainder is distributed +1 unit per second for the first R seconds of the stream.
-  </Accordion>
-  <Accordion title="Live Share Price" icon="chart-line">
-    Since the price updates every second:
-
-    $$
-    Price = \frac{TotalAssets + MaturedRewards}{TotalShares}
-    $$
-  </Accordion>
-</AccordionGroup>
-
-### Yield Calculation (Your Share)
-
-Your earning power is strictly pro-rata. There are no complex multipliers.
-
-$$
-Earning\_Rate = \frac{UserShares}{TotalShares} \times GlobalRewardRate
-$$
-
-### Slashing Mechanics
-
-When a staker is slashed, the value is returned to the compliant pool in two ways:
-
-<CardGroup cols={2}>
-  <Card title="Active Slash" icon="bolt">
-    If an active staker's shares are burned:
-    - `TotalShares` decreases
-    - `TotalAssets` remains unchanged
-    - **Impact**: The share price for every remaining staker jumps instantly
-
-    $$
-    \Delta Price = \frac{TotalAssets}{TotalShares_{new}} - \frac{TotalAssets}{TotalShares_{old}}
-    $$
-  </Card>
-  <Card title="Unbonding Slash" icon="clock">
-    If a user is slashed while in the unbonding period:
-    - Their tokens move instantly from `reserved_assets` → `total_assets`
-    - **Impact**: This creates a step-function jump in share price for all active stakers—not a slow drip
-  </Card>
-</CardGroup>
-
----
-
-## Vault Lifecycle
-
-<Steps>
-  <Step title="Entry (Staking) - 2 week period">
-    Users deposit \$ZC and are minted \$sZC (shares) based on the current price. Yield dripping is active. **Unstaking is disabled**.
-
-    Standard "Funding Mode" allows unlimited deposits.
-  </Step>
-  <Step title="Unbonding (Unstaking Request)">
-    Further \$ZC deposits are disabled. Yield dripping is stopped. **Unstaking requests are enabled**. Slashed funds are instantly distributed to remaining Stakers.
-
-    **Unstaking requests are for 100% of your position**—partial unstaking is not supported. 
-
-    Requesting an exit initiates a **1-day (24 hour) unbonding timer**. 
-    
-    Unbonding tokens move from `total_assets` to `reserved_assets` and **yield accumulation stops instantly**.
-  </Step>
-  <Step title="Exit (Withdrawal)">
-    **After exactly 24 hours**, the `complete_unstake` function becomes available to the Staker.
-
-    Staker withdraws their principal + all yield accrued up until the moment of their Unstaking Request and are freed of their Staker's Obligation.
-  </Step>
-</Steps>
-
-<Warning>
-Stakers can be slashed at any time between staking and completely unstaking their position—including during the unbonding period.
-</Warning>
+The mechanism is self-reinforcing — if you're trading and someone else isn't, you're incentivized to flag them, absorb their stake, and push them back to trade.
 
 ---
 
@@ -156,13 +164,25 @@ Stakers can be slashed at any time between staking and completely unstaking thei
 | :--- | :--- | :--- |
 | **Spot Fee** | 0.5% | Collected from all AMM swaps of Combinator controlled tokens |
 | **Quantum Fee** | 0.5% | Collected from position trades |
-| **Staking Period** | 1,209,600s | The fixed wait time to request unbonding (2 weeks) |
-| **Unbonding Period** | 86,400s | The fixed wait time to exit (1 day) |
-| **Min. Stake** | 1.0 ZC | Minimum balance to maintain a stake PDA |
+| **Volume Window** | 14 days | Trading volume considered for reward calculation |
+| **Daily Cap** | Staked / 7 | Maximum daily reward relative to stake |
+| **Unstaking Period** | 7 days | Wait time after initiating unstake |
 | **Slashing Fee** | 100% | 100% of seized assets go to other stakers |
+
+---
+
+## Resources
+
+- [\$ZC on Jupiter](https://jup.ag/tokens/GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC)
+- [Protocol Stats](https://combinator.trade/stats)
+- [\$ZC Staking](https://combinator.trade/stake)
+- [Community (Telegram)](https://t.me/+Ao05jBnpEE0yZGVh)
+- [Community (Discord)](https://discord.gg/Vf38Mqhxu5)
 
 ---
 
 ## Looking Ahead
 
-This is the first iteration of the Staking Vault and \$ZC product tokenomics. Expect future iterations as the protocol evolves. All feedback is welcome.
+This is a living document. Expect details to change as we iterate on the token design to better serve Combinator's and \$ZC's shared growth.
+
+*Last updated: Jan 26, 2026*

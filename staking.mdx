@@ -11,6 +11,7 @@ title: "ZC Staking"
 | **Vault Program ID** | GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy |
 | **Volume Window** | 14 days |
 | **Daily Reward Cap** | Staked Amount / 7 |
+| **Lifetime Cap** | Staked Amount |
 | **Unstaking Period** | 7 days |
 | **Distribution** | Daily |
 
@@ -84,19 +85,31 @@ $$
 \text{final\_reward} = \min(\text{raw\_reward}, \text{daily\_cap})
 $$
 
-### Daily Cap (Anti-Gaming)
+### Reward Caps
 
-To prevent gaming where someone stakes a large amount right before distribution:
+Your rewards are limited by two caps:
+
+**Daily Cap**
+
+Each distribution, your reward is capped at your staked amount divided by the unstaking period:
 
 $$
 \text{daily\_cap} = \frac{\text{staked\_amount}}{7}
 $$
 
-**Example:**
-- Stake 700 ZC = max 100 ZC/day in rewards
-- Stake 7000 ZC = max 1000 ZC/day in rewards
+- Stake 100 ZC = max ~14.3 ZC per distribution
+- Stake 700 ZC = max 100 ZC per distribution
 
-To earn more rewards, you must commit your stake for a longer effective period.
+**Lifetime Cap**
+
+Your cumulative rewards can never exceed your staked amount.
+
+- Stake 100 ZC = can only ever earn up to 100 ZC total
+- Once you hit this cap, you stop earning until you compound or stake more
+
+<Note>
+Compound regularly to raise your caps.
+</Note>
 
 ### Delegation
 
@@ -121,13 +134,35 @@ Rewards are calculated and distributed **daily**.
   <Step title="Trade">
     Trade on Combinator futarchies. Your volume over the past 14 days determines your reward share.
   </Step>
+  <Step title="Compound">
+    Click "Earned (ZC)" to compound your rewards back into your stake.
+  </Step>
   <Step title="Initiate Unstake">
-    Request to withdraw your stake. This starts a **7-day waiting period**. You cannot initiate another unstake while one is pending.
+    Request to withdraw some or all of your stake. This starts a **7-day waiting period**.
   </Step>
   <Step title="Withdraw">
-    After 7 days, complete the withdrawal to receive your staked \$ZC back.
+    After 7 days, complete the withdrawal to receive your unstaked \$ZC.
   </Step>
 </Steps>
+
+### Compounding
+
+Rewards accrue automatically, but compounding requires action:
+
+- **Check in regularly**: There's no auto-compound — you need to come back and click on your "Earned (ZC)" amount
+- **Compounding raises your cap**: When you compound, your staked amount increases, which raises your lifetime and daily caps
+  - Example: 100 ZC staked (100 cap) → earn 20 → compound → 120 ZC staked (120 cap)
+- **Don't let rewards sit at cap**: If you hit your lifetime cap and don't compound, you stop earning
+- **Strategic play**: Active compounders maximize returns by continuously raising their ceiling
+
+### Unstaking Details
+
+- **Partial unstake**: You can unstake any amount
+- **One at a time**: You can only have one pending unstake. Withdraw before initiating another.
+- **No cancel**: Once initiated, you cannot cancel
+- **Manual withdrawal**: After 7 days, you must come back and click withdraw
+- **Rewards stop immediately**: The moment you initiate unstake, that amount stops earning and your daily cap decreases accordingly
+- **Remaining stake keeps earning**: If you partial unstake, the portion still staked continues earning rewards
 
 <Warning>
 Stakers can be slashed at any time between staking and completing withdrawal — including during the 7-day unstaking period.
@@ -154,7 +189,7 @@ Adherence to your obligation is not measured by rigid code, but by **peer consen
   </Step>
 </Steps>
 
-The mechanism is self-reinforcing — if someone is acting in bad faith, you're incentivized to flag them and absorb their stake.
+The mechanism is self-reinforcing. If someone is acting in bad faith, you're incentivized to flag them and absorb their stake.
 
 ### How to Avoid Getting Slashed
 
@@ -174,6 +209,7 @@ Low trading activity isn't a slashable offense — you simply earn less since re
 | **Quantum Fee** | 0.5% | Collected from position trades |
 | **Volume Window** | 14 days | Trading volume considered for reward calculation |
 | **Daily Cap** | Staked / 7 | Maximum daily reward relative to stake |
+| **Lifetime Cap** | Staked Amount | Maximum cumulative rewards you can earn |
 | **Unstaking Period** | 7 days | Wait time after initiating unstake |
 | **Slashing Fee** | 100% | 100% of seized assets go to other stakers |
 
@@ -193,4 +229,4 @@ Low trading activity isn't a slashable offense — you simply earn less since re
 
 This is a living document. Expect details to change as we iterate on the token design to better serve Combinator's and \$ZC's shared growth.
 
-*Last updated: Jan 26, 2026*
+*Last updated: Jan 27, 2026*

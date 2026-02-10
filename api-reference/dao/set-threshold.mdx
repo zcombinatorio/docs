@@ -1,23 +1,26 @@
 ---
-title: "Set Proposer Token Threshold"
-description: "PUT /dao/:daoPda/proposer-threshold - Set the minimum token balance required to create proposals"
+title: "Configure Proposer Requirements"
+description: "PUT /dao/:daoPda/proposer-config - Set token threshold and holding period for proposal creation"
 ---
 
 ## Overview
 
-Sets the minimum token holding threshold for proposal creation. Any wallet holding at least this amount of the DAO's token can create proposals, regardless of whitelist status.
+Configures proposer eligibility requirements for a DAO. You can set a minimum token balance threshold and optionally require that the balance be held for a minimum period (time-weighted average).
+
+Only fields present in the request body are updated — omitted fields are preserved.
 
 <CodeGroup>
 
 ```bash curl
-curl -X PUT https://api.zcombinator.io/dao/Dao1xgp...ABC/proposer-threshold \
+curl -X PUT https://api.zcombinator.io/dao/Dao1xgp...ABC/proposer-config \
   -H "Content-Type: application/json" \
   -H "x-wallet-address: YOUR_WALLET" \
   -H "x-signature: YOUR_SIGNATURE" \
   -H "x-timestamp: 1736789200" \
   -d '{
     "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-    "threshold": "1000000000"
+    "threshold": "1000000000",
+    "holding_period_hours": 24
   }'
 ```
 
@@ -25,7 +28,7 @@ curl -X PUT https://api.zcombinator.io/dao/Dao1xgp...ABC/proposer-threshold \
 const daoPda = 'Dao1xgp...ABC';
 
 const response = await fetch(
-  `https://api.zcombinator.io/dao/${daoPda}/proposer-threshold`,
+  `https://api.zcombinator.io/dao/${daoPda}/proposer-config`,
   {
     method: 'PUT',
     headers: {
@@ -36,7 +39,8 @@ const response = await fetch(
     },
     body: JSON.stringify({
       wallet: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
-      threshold: '1000000000'  // 1 billion raw units
+      threshold: '1000000000',       // 1 billion raw units
+      holding_period_hours: 24        // 24-hour average balance
     })
   }
 );
@@ -51,11 +55,12 @@ dao_pda = "Dao1xgp...ABC"
 
 data = {
     "wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-    "threshold": "1000000000"  # 1 billion raw units
+    "threshold": "1000000000",       # 1 billion raw units
+    "holding_period_hours": 24        # 24-hour average balance
 }
 
 response = requests.put(
-    f'https://api.zcombinator.io/dao/{dao_pda}/proposer-threshold',
+    f'https://api.zcombinator.io/dao/{dao_pda}/proposer-config',
     json=data,
     headers={
         'Content-Type': 'application/json',
@@ -83,7 +88,11 @@ result = response.json()
 </ParamField>
 
 <ParamField body="threshold" type="string">
-  Minimum token balance in **raw units** (including decimals). Set to `null`, `""`, or `"0"` to disable threshold-based access.
+  Minimum token balance in **raw units** (including decimals). Set to `null`, `""`, or `"0"` to disable threshold-based access. Only updated if present in the request body.
+</ParamField>
+
+<ParamField body="holding_period_hours" type="number">
+  Number of hours over which to calculate the time-weighted average balance. Must be between 1 and 35,040 (4 years). Set to `null` to disable. Cannot be set without a token threshold. Only updated if present in the request body.
 </ParamField>
 
 ## Response
@@ -101,7 +110,11 @@ result = response.json()
 </ResponseField>
 
 <ResponseField name="proposer_token_threshold" type="string | null">
-  The new threshold value, or `null` if disabled
+  The current threshold value, or `null` if disabled
+</ResponseField>
+
+<ResponseField name="proposer_holding_period_hours" type="number | null">
+  The current holding period in hours, or `null` if disabled
 </ResponseField>
 
 ### Success Response
@@ -111,18 +124,22 @@ result = response.json()
   "success": true,
   "dao_pda": "Dao1xgp...ABC",
   "dao_name": "MyDAO",
-  "proposer_token_threshold": "1000000000"
+  "proposer_token_threshold": "1000000000",
+  "proposer_holding_period_hours": 24
 }
 ```
 
 ### Disabling Threshold
+
+Setting threshold to `null` or `"0"` disables both the threshold and holding period:
 
 ```json
 {
   "success": true,
   "dao_pda": "Dao1xgp...ABC",
   "dao_name": "MyDAO",
-  "proposer_token_threshold": null
+  "proposer_token_threshold": null,
+  "proposer_holding_period_hours": null
 }
 ```
 
@@ -141,6 +158,22 @@ result = response.json()
     ```json
     {
       "error": "Threshold must be a non-negative integer string (raw token units)"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Holding Period">
+    ```json
+    {
+      "error": "Holding period must be a positive integer between 1 and 35040 hours (4 years)"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Holding Period Without Threshold">
+    ```json
+    {
+      "error": "Cannot set holding period without a token threshold"
     }
     ```
   </Accordion>
@@ -179,6 +212,6 @@ The threshold is specified in **raw token units**, not decimal amounts. For a to
 
 A wallet can create proposals if **either** condition is met:
 1. The wallet is on the proposer whitelist, **OR**
-2. The wallet holds at least `threshold` raw units of the DAO's token
+2. The wallet holds at least `threshold` raw units of the DAO's token (averaged over `holding_period_hours` if set)
 
 Setting the threshold to `null` means only whitelisted proposers can create proposals.

@@ -1,0 +1,200 @@
+---
+title: "Quickstart"
+description: "Go from zero to a working DAO with futarchy proposals in minutes"
+---
+
+## Prerequisites
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/zcombinatorio/combinator.git
+   cd combinator/ui
+   pnpm install
+   ```
+
+2. **Create a `.env` file**
+   ```bash
+   RPC_URL=<your-solana-rpc-endpoint>
+   PRIVATE_KEY=<your-base58-encoded-private-key>
+   ```
+
+3. **Fund your wallet**
+   - ~10 USDC for pool liquidity (or SOL if using SOL-quoted pools)
+   - ~0.5 SOL for transaction fees and DAO funding
+
+All scripts and files referenced in this guide live in the repository cloned above. Links to GitHub are provided for quick reference.
+
+---
+
+## Quick Start (5 Commands)
+
+The fastest path to a working DAO: **USDC quote + DAMM pool + SPL Token**.
+
+```bash
+# 1. Create token + USDC pool
+TOKEN_NAME="MyDAO" TOKEN_SYMBOL="MYDAO" USDC_AMOUNT=10 TOKEN_PERCENT=10 SKIP_METADATA=true \
+  pnpm tsx scripts/create-token-with-pool.ts
+# → Save: TOKEN_MINT, POOL_ADDRESS
+
+# 2. Create the DAO (auto-funds admin wallet with 0.11 SOL)
+API_URL=https://api.zcombinator.io DAO_NAME="MyDAO" \
+  TOKEN_MINT="<from-step-1>" POOL_ADDRESS="<from-step-1>" \
+  pnpm tsx scripts/test-dao-parent.ts
+# → Save: DAO_PDA, ADMIN_WALLET, MINT_VAULT
+
+# 3. Transfer mint authority to the DAO
+TOKEN_MINT="<from-step-1>" NEW_AUTHORITY="<MINT_VAULT>" \
+  pnpm tsx scripts/transfer-mint-authority.ts
+
+# 4. Transfer LP position to DAO admin
+POOL_ADDRESS="<from-step-1>" ADMIN_WALLET="<from-step-2>" \
+  pnpm tsx scripts/e2e-transfer-lp.ts
+
+# 5. Create a proposal
+API_URL=https://api.zcombinator.io DAO_PDA="<from-step-2>" \
+  WARMUP_SECS=60 PROPOSAL_LENGTH_SECS=300 \
+  pnpm tsx scripts/test-dao-proposal.ts
+```
+
+That's it. You have a DAO with a live futarchy proposal.
+
+---
+
+## What Each Step Does
+
+### Step 1: Create Token + Pool
+
+[`create-token-with-pool.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/create-token-with-pool.ts) mints a new SPL token and creates a Meteora DAMM pool in one operation.
+
+**Save these outputs** — you'll need them for every subsequent step:
+- `TOKEN_MINT` — your governance token address
+- `POOL_ADDRESS` — the Meteora pool address
+
+<Info>
+Want to create the token and pool separately? Use [`create-token.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/create-token.ts) and [`create-damm-pool.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/create-damm-pool.ts).
+</Info>
+
+### Step 2: Create the DAO
+
+[`test-dao-parent.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/test-dao-parent.ts) calls [`POST /dao/parent`](/api-reference/dao/create-dao) to create a parent DAO. It automatically transfers 0.11 SOL to fund the admin wallet before calling the API.
+
+**Save these outputs:**
+- `DAO_PDA` — your DAO's on-chain address
+- `ADMIN_WALLET` — the managed wallet that signs on-chain transactions
+- `MINT_VAULT` — where mint authority must be transferred to
+
+### Step 3: Transfer Mint Authority
+
+[`transfer-mint-authority.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/transfer-mint-authority.ts) transfers your token's mint authority to the DAO's `MINT_VAULT`.
+
+<Warning>
+Use the **exact** `MINT_VAULT` address from step 2. Do not derive or modify this address.
+</Warning>
+
+### Step 4: Transfer LP Position
+
+[`e2e-transfer-lp.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/e2e-transfer-lp.ts) transfers your DAMM LP position NFT to the DAO's `ADMIN_WALLET`. This gives the DAO control over the liquidity used to seed futarchy markets.
+
+### Step 5: Create a Proposal
+
+[`test-dao-proposal.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/test-dao-proposal.ts) calls [`POST /dao/proposal`](/api-reference/proposals/create) to create a futarchy proposal. The DAO temporarily withdraws liquidity from the pool to seed the prediction markets.
+
+---
+
+## Alternative Configurations
+
+### SOL-Quoted Pool
+
+Use SOL instead of USDC as the quote token. Add `QUOTE_MINT=SOL` and `SOL_AMOUNT` to step 1:
+
+```bash
+TOKEN_NAME="MyDAO" TOKEN_SYMBOL="MYDAO" QUOTE_MINT=SOL SOL_AMOUNT=1 TOKEN_PERCENT=10 SKIP_METADATA=true \
+  pnpm tsx scripts/create-token-with-pool.ts
+```
+
+All subsequent steps are identical.
+
+### DLMM Pool
+
+Use a Meteora DLMM (concentrated liquidity) pool instead of DAMM. Two steps differ:
+
+**Step 1** — use [`create-token-with-dlmm-pool.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/create-token-with-dlmm-pool.ts):
+```bash
+TOKEN_NAME="MyDAO" TOKEN_SYMBOL="MYDAO" USDC_AMOUNT=10 TOKEN_PERCENT=10 BIN_STEP=25 \
+  pnpm tsx scripts/create-token-with-dlmm-pool.ts
+```
+
+**Step 4** — use [`e2e-transfer-dlmm-lp.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/e2e-transfer-dlmm-lp.ts) (DLMM positions can't be directly transferred like DAMM NFTs — this script withdraws and re-deposits):
+```bash
+POOL_ADDRESS="<from-step-1>" ADMIN_WALLET="<from-step-2>" \
+  pnpm tsx scripts/e2e-transfer-dlmm-lp.ts
+```
+
+DLMM also supports **Token-2022** base tokens — add `USE_TOKEN_2022=true` to step 1.
+
+### Child DAO
+
+Create a DAO under an existing parent. Child DAOs share the parent's liquidity pool, so no LP transfer is needed.
+
+```bash
+# 1. Create a token for the child DAO
+TOKEN_NAME="ChildDAO" TOKEN_SYMBOL="CHILD" SKIP_METADATA=true \
+  pnpm tsx scripts/create-token.ts
+
+# 2. Create child DAO under existing parent
+API_URL=https://api.zcombinator.io \
+  CHILD_DAO_NAME="MyChildDAO" \
+  PARENT_PDA="<parent-dao-pda>" \
+  TOKEN_MINT="<from-step-1>" \
+  pnpm tsx scripts/test-dao-child.ts
+
+# 3. Transfer mint authority
+TOKEN_MINT="<from-step-1>" NEW_AUTHORITY="<MINT_VAULT from step-2>" \
+  pnpm tsx scripts/transfer-mint-authority.ts
+
+# 4. Create a proposal (no LP transfer needed)
+API_URL=https://api.zcombinator.io DAO_PDA="<from-step-2>" \
+  WARMUP_SECS=60 PROPOSAL_LENGTH_SECS=300 \
+  pnpm tsx scripts/test-dao-proposal.ts
+```
+
+---
+
+## Pool Types
+
+| | DAMM (Recommended) | DLMM |
+| :--- | :--- | :--- |
+| **Type** | Traditional AMM | Concentrated liquidity |
+| **LP Positions** | NFT-based (directly transferable) | Account-based (withdraw + re-deposit) |
+| **Quote Tokens** | USDC, SOL | USDC, SOL |
+| **Base Token** | SPL Token | SPL Token, Token-2022 |
+| **Complexity** | Lower | Higher |
+| **Scripts** | [`create-token-with-pool.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/create-token-with-pool.ts), [`e2e-transfer-lp.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/e2e-transfer-lp.ts) | [`create-token-with-dlmm-pool.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/create-token-with-dlmm-pool.ts), [`e2e-transfer-dlmm-lp.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/e2e-transfer-dlmm-lp.ts) |
+
+The pool type is **auto-detected** when creating a DAO — just provide any valid Meteora pool address.
+
+---
+
+## Utility Scripts
+
+These scripts help with debugging and verification:
+
+| Script | Purpose |
+| :--- | :--- |
+| [`fetch-dao-info.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/fetch-dao-info.ts) | Fetch DAO details from the API (admin wallet, mint vault, etc.) |
+| [`check-moderator.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/check-moderator.ts) | Check on-chain moderator state and proposal counter |
+| [`check-lp-positions.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/check-lp-positions.ts) | Check DAMM LP positions for a wallet |
+| [`check-dlmm-lp-positions.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/check-dlmm-lp-positions.ts) | Check DLMM LP positions for a wallet |
+| [`fund-admin-wallet.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/fund-admin-wallet.ts) | Top up the admin wallet with SOL (default 0.2 SOL) |
+| [`swap-sol-to-usdc.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/swap-sol-to-usdc.ts) | Swap SOL to USDC if you need pool liquidity |
+
+---
+
+## After Setup
+
+Once your DAO is live, you can:
+
+- **Manage proposers** — add/remove wallets via [`POST /dao/:daoPda/proposers`](/api-reference/dao/add-proposer) and [`DELETE /dao/:daoPda/proposers/:wallet`](/api-reference/dao/remove-proposer)
+- **Configure proposer requirements** — set a minimum token balance and/or holding period for proposal eligibility via [`PUT /dao/:daoPda/proposer-config`](/api-reference/dao/set-threshold)
+- **Monitor proposals** — poll live market data via [`GET /dao/proposal/:proposalPda/market-status`](/api-reference/trading/market-status)
+- **Adjust liquidity withdrawal** — control how much LP is used per proposal via [`PUT /dao/:daoPda/withdrawal-percentage`](/api-reference/dao/set-withdrawal-percentage)

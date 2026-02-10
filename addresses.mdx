@@ -3,108 +3,24 @@ title: 'Protocol Addresses'
 description: 'Key addresses for the Combinator protocol'
 ---
 
-## Overview
+## $ZC Token
 
-This page contains all the important addresses for the Combinator protocol. These addresses are used for treasury operations, token management, and governance execution.
+`GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC` — [Solscan](https://solscan.io/token/GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC)
 
----
+## Treasury
 
-## $ZC Token Address
+`4Ckm4JKxJr6qZJHhoPnTkeVdV1qEPmt53hfVcFPCb5fU` — [Solscan](https://solscan.io/account/4Ckm4JKxJr6qZJHhoPnTkeVdV1qEPmt53hfVcFPCb5fU)
 
-**Address:** `GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC`
+Controlled by futarchy governance. Holds protocol assets including $ZC, revenue, and strategic reserves.
 
-The official $ZC token address on Solana.
+## Fee Wallet
 
-<Card
-  title="View on Solscan"
-  icon="magnifying-glass"
-  href="https://solscan.io/token/GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC"
->
-  View token on Solscan
-</Card>
+`FEEnkcCNE2623LYCPtLf63LFzXpCFigBLTu4qZovRGZC` — [Solscan](https://solscan.io/account/FEEnkcCNE2623LYCPtLf63LFzXpCFigBLTu4qZovRGZC)
 
----
+Collects protocol fees. Used for automated $ZC buybacks.
 
-## Treasury Address
+## Staking Vault Program
 
-**Address:** `4Ckm4JKxJr6qZJHhoPnTkeVdV1qEPmt53hfVcFPCb5fU`
+`GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy` — [Solscan](https://solscan.io/account/GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy)
 
-The treasury address holds all protocol assets and is **controlled entirely by futarchy governance**. All treasury operations are subject to governance approval through futarchy.
-
-Treasury assets include:
-- $ZC token holdings
-- Protocol revenue and fees
-- Strategic asset reserves
-
-<Card
-  title="View on Solscan"
-  icon="magnifying-glass"
-  href="https://solscan.io/account/4Ckm4JKxJr6qZJHhoPnTkeVdV1qEPmt53hfVcFPCb5fU"
->
-  View treasury address on Solscan
-</Card>
-
----
-
-## Fee Wallet Address
-
-**Address:** `FEEnkcCNE2623LYCPtLf63LFzXpCFigBLTu4qZovRGZC`
-
-The fee wallet is used for programmatic buybacks. Protocol fees are collected here and used to automatically buy back $ZC tokens from the market.
-
-<Card
-  title="View on Solscan"
-  icon="magnifying-glass"
-  href="https://solscan.io/account/FEEnkcCNE2623LYCPtLf63LFzXpCFigBLTu4qZovRGZC"
->
-  View fee wallet on Solscan
-</Card>
-
----
-
-## Protocol Authority Address
-
-**Address:** `Hq7Xh37tT4sesD6wA4DphYfxeMJRhhFWS3KVUSSGjqzc`
-
-This address holds:
-- Liquidity Pool (LP) positions
-- Mint authority for protocol tokens
-- Update authority for token metadata
-
-<Card
-  title="View on Solscan"
-  icon="magnifying-glass"
-  href="https://solscan.io/account/Hq7Xh37tT4sesD6wA4DphYfxeMJRhhFWS3KVUSSGjqzc"
->
-  View protocol authority address on Solscan
-</Card>
-
----
-
-## Staking Vault Program ID
-
-**Address:** `GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy`
-
-The on-chain program that manages the \$ZC staking vault, including deposits, withdrawals, reward distribution, and slashing mechanics.
-
-<Card
-  title="View on Solscan"
-  icon="magnifying-glass"
-  href="https://solscan.io/account/GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy"
->
-  View staking vault program on Solscan
-</Card>
-
----
-
-## Security Notes
-
-<Warning>
-  Always verify addresses before sending any transactions. Double-check addresses on official channels before interacting with the protocol.
-</Warning>
-
-- All protocol addresses are publicly verifiable on the Solana blockchain
-- Treasury address is controlled by futarchy governance, not by any individual or team
-- Changes to protocol addresses require governance approval through futarchy
-
----
+On-chain program managing staking, rewards, and slashing.

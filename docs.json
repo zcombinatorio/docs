@@ -17,15 +17,14 @@
             "group": "Overview",
             "pages": [
               "index",
-              "how-to-trade",
-              "writings"
+              "api-reference/dao/quickstart",
+              "how-to-trade"
             ]
           },
           {
             "group": "Protocol",
             "pages": [
               "staking",
-              "governance",
               "addresses"
             ]
           }
@@ -48,14 +47,16 @@
             ]
           },
           {
-            "group": "DAO Management API",
+            "group": "DAO API",
             "pages": [
-              "api-reference/dao/overview",
               "api-reference/dao/create-dao",
+              "api-reference/dao/reserve-admin",
+              "api-reference/dao/finalize-reserved",
               "api-reference/dao/add-proposer",
               "api-reference/dao/remove-proposer",
               "api-reference/dao/set-threshold",
-              "api-reference/dao/set-withdrawal-percentage"
+              "api-reference/dao/set-withdrawal-percentage",
+              "api-reference/proposals/create"
             ]
           },
           {
@@ -63,12 +64,6 @@
             "pages": [
               "api-reference/fee-claim/claim",
               "api-reference/fee-claim/confirm"
-            ]
-          },
-          {
-            "group": "Proposals API",
-            "pages": [
-              "api-reference/proposals/create"
             ]
           },
           {

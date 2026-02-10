@@ -13,7 +13,7 @@ In the context of futarchy, a **DAO** (Decentralized Autonomous Organization) is
 
 When you create a DAO, you're essentially:
 1. **Linking a Meteora liquidity pool** to the futarchy system
-2. **Enabling futarchies** that can temporarily withdraw liquidity to seed trading
+2. **Enabling decision markets** that can temporarily withdraw liquidity to seed trading
 3. **Defining who can create proposals** (markets) for your community
 
 Think of a DAO as the bridge between your token's existing liquidity and the futarchy infrastructure. Each DAO has its own proposer whitelist, token threshold settings, and configuration for how much liquidity to use when launching markets.
@@ -31,7 +31,7 @@ Think of a DAO as the bridge between your token's existing liquidity and the fut
     DAOs created under a parent that share the same pool. Child DAOs:
     - Inherit the parent's liquidity pool
     - Have independent proposer whitelists
-    - Can run their own futarchies
+    - Can run their own decision markets
   </Card>
 </CardGroup>
 
@@ -63,9 +63,11 @@ https://api.zcombinator.io
 | :--- | :--- | :--- |
 | POST | `/dao/parent` | Create a parent DAO |
 | POST | `/dao/child` | Create a child DAO |
+| POST | `/dao/reserve-admin` | Reserve admin wallet for external DAO creation |
+| POST | `/dao/finalize-reserved` | Finalize a reserved DAO after on-chain creation |
 | POST | `/dao/:daoPda/proposers` | Add a proposer to whitelist |
 | DELETE | `/dao/:daoPda/proposers/:wallet` | Remove a proposer |
-| PUT | `/dao/:daoPda/proposer-threshold` | Set token holding threshold |
+| PUT | `/dao/:daoPda/proposer-config` | Set token threshold and holding period |
 | PUT | `/dao/:daoPda/withdrawal-percentage` | Set liquidity withdrawal % |
 
 ## Proposer Authorization

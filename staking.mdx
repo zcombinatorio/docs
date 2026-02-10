@@ -2,231 +2,72 @@
 title: "ZC Staking"
 ---
 
-## Executive Summary
+Stake \$ZC, trade decision markets, earn a share of protocol revenue. 100% of protocol fees go to buying back \$ZC and distributing it to active stakers.
 
-\$ZC is a **Product Token** — a license to contribute value to and capture value from the Combinator futarchy infrastructure. Stake it for the opportunity to earn a share of protocol revenue based on your trading volume, capped by your stake.
+Decision markets running on \$ZC determine how treasury revenue is distributed and how token emissions are allocated to incentivize growth. Active proposals are at [combinator.trade/zc](https://combinator.trade/zc).
 
 | Parameter | Value |
 | :--- | :--- |
-| **Vault Program ID** | GmH3zEvgmWoC6Y6hxinYYRWLCuxUikRN5SAmVDVF4Jjy |
 | **Volume Window** | 14 days |
 | **Daily Reward Cap** | Staked Amount / 7 |
 | **Lifetime Cap** | Staked Amount |
 | **Unstaking Period** | 7 days |
 | **Distribution** | Daily |
 
----
-
-## The Value Loop
-
-100% of protocol revenue goes to buying back \$ZC. This includes trading fees from futarchies and spot swaps on associated tokens (\$ZC, \$SURF, etc.). Every dollar Combinator captures gets absorbed by \$ZC.
-
-This creates a direct feedback loop:
-
-<Steps>
-  <Step title="Stake">
-    You buy and stake \$ZC
-  </Step>
-  <Step title="Trade">
-    You trade futarchies and earn \$ZC
-  </Step>
-  <Step title="Improve">
-    Your trading activity makes Combinator's decisions more accurate
-  </Step>
-  <Step title="Grow">
-    More accurate decisions attract more builders and integrations
-  </Step>
-  <Step title="Revenue">
-    Combinator earns more revenue, which buys back \$ZC
-  </Step>
-  <Step title="Distribute">
-    \$ZC is distributed to active stakers
-  </Step>
-</Steps>
-
-The trading you do as a \$ZC staker directly grows the Combinator network and the value of what you hold.
+**Links:** [Stake](https://combinator.trade/stake) | [Protocol Stats](https://combinator.trade/stats) | [\$ZC on Jupiter](https://jup.ag/tokens/GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC)
 
 ---
 
-## The Social Contract
+## How Rewards Work
 
-Staking \$ZC is not passive income — it's a **paid role** within the ecosystem.
+Your reward each day is based on your share of trading volume over the past 14 days:
 
-<CardGroup cols={2}>
-  <Card title="The Reward" icon="gift">
-    A share of protocol revenue based on your trading volume and capped by your stake, plus assets seized from slashed stakers.
-  </Card>
-  <Card title="The Obligation" icon="briefcase">
-    Active participation — trading futarchies in good faith, deepening liquidity, and policing stakers who are acting in bad faith.
-  </Card>
-</CardGroup>
+$$
+\text{reward} = \min\!\left(\text{fee\_wallet\_balance} \times \frac{\text{your\_volume}}{\text{total\_volume}},\;\frac{\text{staked\_amount}}{7}\right)
+$$
+
+Two caps limit your earnings:
+
+- **Daily cap** — staked amount / 7 per distribution. Stake 700 ZC = max 100 ZC/day.
+- **Lifetime cap** — cumulative rewards can't exceed your staked amount. Compound to raise it.
+
+---
+
+## Staking Operations
+
+**Stake** — deposit \$ZC into the vault. Your staked amount determines your reward caps.
+
+**Compound** — click "Earned (ZC)" to roll rewards back into your stake. This raises both caps. Don't let rewards sit at the lifetime cap or you stop earning.
+
+**Unstake** — initiate a withdrawal. Starts a 7-day waiting period. That amount stops earning immediately. You can only have one pending unstake at a time. Cannot be cancelled.
+
+**Withdraw** — after 7 days, come back and complete the withdrawal.
+
+**Delegation** — link separate trading wallets to your staking position so volume from those wallets counts toward your rewards. Contact the team via [Telegram](https://t.me/+Ao05jBnpEE0yZGVh) or [Discord](https://discord.gg/Vf38Mqhxu5) to set this up.
+
+---
+
+## Slashing
+
+Staking is an active role. Stakers are expected to trade decision markets in good faith. Bad faith actors can be slashed by the community through a futarchy proposal.
+
+1. Any user flags a staker at [combinator.trade/zc/create](https://combinator.trade/zc/create)
+2. The team reviews and launches a slashing futarchy (e.g., "How much should we slash Staker [wallet]?")
+3. The market trades and resolves
+4. If the result is a positive slash amount, that portion is seized and redistributed to active stakers
+
+Stakers can be tracked at [combinator.trade/zc/stake](https://combinator.trade/zc/stake). Slashing applies during the unstaking period too.
 
 <Note>
-The \$ZC incentive exists because stakers trade and grow Combinator's user base, activity, and revenue. More stakers means more volume and attention on Combinator futarchies, which means more accurate decisions.
+Low activity isn't slashable — you just earn less. Slashing is for bad faith actors gaming the system.
 </Note>
 
 ---
 
-## Mechanics
+## Fee Structure
 
-### Reward Formula
-
-Your rewards are calculated based on your share of trading volume:
-
-$$
-\text{volume\_share} = \frac{\text{your\_volume}}{\text{total\_volume}}
-$$
-
-$$
-\text{raw\_reward} = \text{fee\_wallet\_balance} \times \text{volume\_share}
-$$
-
-$$
-\text{final\_reward} = \min(\text{raw\_reward}, \text{daily\_cap})
-$$
-
-### Reward Caps
-
-Your rewards are limited by two caps:
-
-**Daily Cap**
-
-Each distribution, your reward is capped at your staked amount divided by the unstaking period:
-
-$$
-\text{daily\_cap} = \frac{\text{staked\_amount}}{7}
-$$
-
-- Stake 100 ZC = max ~14.3 ZC per distribution
-- Stake 700 ZC = max 100 ZC per distribution
-
-**Lifetime Cap**
-
-Your cumulative rewards can never exceed your staked amount.
-
-- Stake 100 ZC = can only ever earn up to 100 ZC total
-- Once you hit this cap, you stop earning until you compound or stake more
-
-<Note>
-Compound regularly to raise your caps.
-</Note>
-
-### Delegation
-
-You can link separate trading wallets to your staking position. Volume from delegate wallets counts toward your rewards, useful for separating your staking wallet from your trading wallet.
-
-<Note>
-To set up delegation, contact the team via [Telegram](https://t.me/+Ao05jBnpEE0yZGVh) or [Discord](https://discord.gg/Vf38Mqhxu5).
-</Note>
-
-### Distribution Timing
-
-Rewards are calculated and distributed **daily**.
-
----
-
-## User Operations
-
-<Steps>
-  <Step title="Stake">
-    Deposit \$ZC into the staking vault. Your tokens are transferred to the reward vault and your staked amount is recorded.
-  </Step>
-  <Step title="Trade">
-    Trade on Combinator futarchies. Your volume over the past 14 days determines your reward share.
-  </Step>
-  <Step title="Compound">
-    Click "Earned (ZC)" to compound your rewards back into your stake.
-  </Step>
-  <Step title="Initiate Unstake">
-    Request to withdraw some or all of your stake. This starts a **7-day waiting period**.
-  </Step>
-  <Step title="Withdraw">
-    After 7 days, complete the withdrawal to receive your unstaked \$ZC.
-  </Step>
-</Steps>
-
-### Compounding
-
-Rewards accrue automatically, but compounding requires action:
-
-- **Check in regularly**: There's no auto-compound — you need to come back and click on your "Earned (ZC)" amount
-- **Compounding raises your cap**: When you compound, your staked amount increases, which raises your lifetime and daily caps
-  - Example: 100 ZC staked (100 cap) → earn 20 → compound → 120 ZC staked (120 cap)
-- **Don't let rewards sit at cap**: If you hit your lifetime cap and don't compound, you stop earning
-- **Strategic play**: Active compounders maximize returns by continuously raising their ceiling
-
-### Unstaking Details
-
-- **Partial unstake**: You can unstake any amount
-- **One at a time**: You can only have one pending unstake. Withdraw before initiating another.
-- **No cancel**: Once initiated, you cannot cancel
-- **Manual withdrawal**: After 7 days, you must come back and click withdraw
-- **Rewards stop immediately**: The moment you initiate unstake, that amount stops earning and your daily cap decreases accordingly
-- **Remaining stake keeps earning**: If you partial unstake, the portion still staked continues earning rewards
-
-<Warning>
-Stakers can be slashed at any time between staking and completing withdrawal — including during the 7-day unstaking period.
-</Warning>
-
----
-
-## Enforcement (Quantum Justice)
-
-Adherence to your obligation is not measured by rigid code, but by **peer consensus validated via futarchy**. The community polices itself:
-
-<Steps>
-  <Step title="Accusation">
-    Any user can flag a staker for bad faith activity. Stakers can be tracked at https://combinator.trade/zc/stake. Slashing proposals can be made at https://combinator.trade/zc/create.
-  </Step>
-  <Step title="QM Activation">
-    The Combinator Team reviews the proposal and launches a specific futarchy (e.g., "How much should we slash Staker [wallet]?").
-  </Step>
-  <Step title="The Verdict">
-    The market actively trades, allowing the community to price the probability and magnitude of the user's guilt based on their on-chain history.
-  </Step>
-  <Step title="Execution">
-    If the market resolves to a positive slash amount, the contract seizes that portion of the user's staked position and redistributes it to active stakers.
-  </Step>
-</Steps>
-
-The mechanism is self-reinforcing. If someone is acting in bad faith, you're incentivized to flag them and absorb their stake.
-
-### How to Avoid Getting Slashed
-
-Slashing only applies to stakers who attempt to game the system or act in bad faith against the spirit of the incentive program. If you're staking and trading honestly, you have nothing to worry about.
-
-<Note>
-Low trading activity isn't a slashable offense — you simply earn less since rewards are volume-based. Slashing is reserved for bad faith actors.
-</Note>
-
----
-
-## Economic Parameters
-
-| Parameter | Value | Description |
+| Fee | Rate | Source |
 | :--- | :--- | :--- |
-| **Spot Fee** | 0.5% | Collected from all AMM swaps of Combinator controlled tokens |
-| **Quantum Fee** | 0.5% | Collected from position trades |
-| **Volume Window** | 14 days | Trading volume considered for reward calculation |
-| **Daily Cap** | Staked / 7 | Maximum daily reward relative to stake |
-| **Lifetime Cap** | Staked Amount | Maximum cumulative rewards you can earn |
-| **Unstaking Period** | 7 days | Wait time after initiating unstake |
-| **Slashing Fee** | 100% | 100% of seized assets go to other stakers |
-
----
-
-## Resources
-
-- [\$ZC on Jupiter](https://jup.ag/tokens/GVvPZpC6ymCoiHzYJ7CWZ8LhVn9tL2AUpRjSAsLh6jZC)
-- [Protocol Stats](https://combinator.trade/stats)
-- [\$ZC Staking](https://combinator.trade/stake)
-- [Community (Telegram)](https://t.me/+Ao05jBnpEE0yZGVh)
-- [Community (Discord)](https://discord.gg/Vf38Mqhxu5)
-
----
-
-## Looking Ahead
-
-This is a living document. Expect details to change as we iterate on the token design to better serve Combinator's and \$ZC's shared growth.
-
-*Last updated: Jan 27, 2026*
+| **Spot Fee** | ~0.5% | AMM swaps on Combinator-controlled tokens |
+| **Futarchy Fee** | 0.5% | Position trades in futarchy markets |
+| **Slashing** | 100% | Seized assets go entirely to other stakers |

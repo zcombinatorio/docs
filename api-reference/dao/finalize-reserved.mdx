@@ -1,0 +1,217 @@
+---
+title: "Finalize Reserved DAO"
+description: "POST /dao/finalize-reserved - Finalize a reserved DAO after on-chain creation"
+---
+
+## Overview
+
+Finalizes a DAO that was reserved via [`POST /dao/reserve-admin`](/api-reference/dao/reserve-admin). After the client's on-chain transaction confirms, this endpoint:
+
+1. Fetches the DAO account from on-chain
+2. Verifies the admin wallet matches the reserved wallet (proves `transferAdmin` happened)
+3. Extracts moderator PDA, treasury vault, and mint vault from on-chain state
+4. Activates the DAO so it appears in queries and can accept proposals
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://api.zcombinator.io/dao/finalize-reserved \
+  -H "Content-Type: application/json" \
+  -d '{
+    "api_key": "YOUR_API_KEY",
+    "dao_id": 42,
+    "dao_pda": "DaoPda1xgp...ABC"
+  }'
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/dao/finalize-reserved', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    api_key: 'YOUR_API_KEY',
+    dao_id: 42,
+    dao_pda: 'DaoPda1xgp...ABC'
+  })
+});
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    'https://api.zcombinator.io/dao/finalize-reserved',
+    json={
+        'api_key': 'YOUR_API_KEY',
+        'dao_id': 42,
+        'dao_pda': 'DaoPda1xgp...ABC'
+    }
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField body="api_key" type="string" required>
+  API key for authentication (same key as reserve-admin)
+</ParamField>
+
+<ParamField body="dao_id" type="number" required>
+  The `dao_id` returned from `POST /dao/reserve-admin`
+</ParamField>
+
+<ParamField body="dao_pda" type="string" required>
+  The on-chain DAO PDA created in your transaction
+</ParamField>
+
+## Response
+
+<ResponseField name="dao_id" type="number">
+  The DAO's ID
+</ResponseField>
+
+<ResponseField name="dao_pda" type="string">
+  The on-chain DAO PDA (now stored in DB)
+</ResponseField>
+
+<ResponseField name="dao_name" type="string">
+  The DAO name
+</ResponseField>
+
+<ResponseField name="moderator_pda" type="string">
+  The moderator PDA extracted from on-chain state
+</ResponseField>
+
+<ResponseField name="treasury_vault" type="string">
+  Treasury vault PDA (derived from on-chain treasury multisig)
+</ResponseField>
+
+<ResponseField name="mint_vault" type="string">
+  Mint authority vault PDA (derived from on-chain mint auth multisig)
+</ResponseField>
+
+<ResponseField name="admin_wallet" type="string">
+  The managed admin wallet
+</ResponseField>
+
+<ResponseField name="visibility" type="number">
+  DAO visibility level (set to 3 — client test)
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "dao_id": 42,
+  "dao_pda": "DaoPda1xgp...ABC",
+  "dao_name": "MyDAO",
+  "moderator_pda": "ModPda1xgp...DEF",
+  "treasury_vault": "TreasuryVault1xgp...GHI",
+  "mint_vault": "MintVault1xgp...JKL",
+  "admin_wallet": "AdminWallet1xgp...MNO",
+  "visibility": 3
+}
+```
+
+## Validation
+
+The endpoint performs several checks before finalizing:
+
+| Check | Error |
+| :--- | :--- |
+| DAO exists | 404 - DAO not found |
+| DAO has not been finalized yet | 409 - DAO already finalized |
+| DAO exists on-chain | 404 - DAO not found on-chain |
+| On-chain admin matches reserved admin | 400 - Admin mismatch |
+| On-chain name matches reserved name | 400 - Name mismatch |
+| On-chain DAO is a parent type | 400 - Not a parent DAO |
+
+<Warning>
+The admin match check is the critical security gate — it proves that the client's on-chain transaction included `transferAdmin` to the managed wallet returned by reserve-admin.
+</Warning>
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing Fields">
+    ```json
+    {
+      "error": "Missing required fields: dao_id, dao_pda"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid dao_id Type">
+    ```json
+    {
+      "error": "dao_id must be a number"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Admin Mismatch">
+    ```json
+    {
+      "error": "Admin mismatch: on-chain admin does not match reserved admin wallet",
+      "on_chain_admin": "...",
+      "expected_admin": "..."
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Name Mismatch">
+    ```json
+    {
+      "error": "Name mismatch: on-chain name does not match reserved name",
+      "on_chain_name": "...",
+      "expected_name": "..."
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Not a Parent DAO">
+    ```json
+    {
+      "error": "On-chain DAO is not a parent DAO"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="403 - Invalid API Key">
+    ```json
+    {
+      "error": "Invalid API key"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - DAO Not Found">
+    ```json
+    {
+      "error": "DAO not found"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="404 - DAO Not Found On-Chain">
+    ```json
+    {
+      "error": "DAO not found on-chain"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="409 - Already Finalized">
+    ```json
+    {
+      "error": "DAO already finalized",
+      "dao_pda": "..."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

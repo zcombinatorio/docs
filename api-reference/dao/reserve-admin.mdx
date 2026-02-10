@@ -1,0 +1,198 @@
+---
+title: "Reserve Admin"
+description: "POST /dao/reserve-admin - Reserve a managed admin wallet for external DAO creation"
+---
+
+## Overview
+
+Reserves a managed admin wallet that a client can use when creating a DAO on-chain in their own transaction. This enables clients to bundle DAO creation with other instructions (token launch, pool creation, LP transfer, etc.) in a single transaction.
+
+The DAO is not active until you call [`POST /dao/finalize-reserved`](/api-reference/dao/finalize-reserved) after your on-chain transaction confirms.
+
+<Info>
+This endpoint uses API key authentication, not wallet signature authentication. Contact the team to obtain an API key.
+</Info>
+
+## Flow
+
+```
+1. POST /dao/reserve-admin     → get admin_wallet + dao_id
+2. Build on-chain transaction:
+   - Create token + pool
+   - Create DAO (with yourself as temp admin)
+   - transferAdmin to the reserved admin_wallet
+   - Transfer LP to admin_wallet
+   - Transfer mint authority
+3. Submit transaction
+4. POST /dao/finalize-reserved  → activate the DAO
+```
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://api.zcombinator.io/dao/reserve-admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "api_key": "YOUR_API_KEY",
+    "name": "MyDAO",
+    "token_mint": "TokenMint1xgp...ABC",
+    "pool_address": "Pool1xgp...DEF",
+    "pool_type": "damm",
+    "quote_mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "treasury_cosigner": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    "owner_wallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+  }'
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/dao/reserve-admin', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    api_key: 'YOUR_API_KEY',
+    name: 'MyDAO',
+    token_mint: 'TokenMint1xgp...ABC',
+    pool_address: 'Pool1xgp...DEF',
+    pool_type: 'damm',
+    quote_mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    treasury_cosigner: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
+    owner_wallet: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'
+  })
+});
+
+const result = await response.json();
+// { admin_wallet: "...", admin_key_idx: 5, dao_id: 42 }
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    'https://api.zcombinator.io/dao/reserve-admin',
+    json={
+        'api_key': 'YOUR_API_KEY',
+        'name': 'MyDAO',
+        'token_mint': 'TokenMint1xgp...ABC',
+        'pool_address': 'Pool1xgp...DEF',
+        'pool_type': 'damm',
+        'quote_mint': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+        'treasury_cosigner': '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
+        'owner_wallet': '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'
+    }
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField body="api_key" type="string" required>
+  API key for authentication
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  DAO name (max 32 characters). Must be unique.
+</ParamField>
+
+<ParamField body="token_mint" type="string" required>
+  Governance token mint address
+</ParamField>
+
+<ParamField body="pool_address" type="string" required>
+  Meteora pool address
+</ParamField>
+
+<ParamField body="pool_type" type="string" required>
+  Pool type: `"damm"` or `"dlmm"`
+</ParamField>
+
+<ParamField body="quote_mint" type="string" required>
+  Quote token mint address (e.g., USDC or SOL mint)
+</ParamField>
+
+<ParamField body="treasury_cosigner" type="string" required>
+  Treasury co-signer wallet address
+</ParamField>
+
+<ParamField body="owner_wallet" type="string" required>
+  DAO owner wallet address. Automatically added to the proposer whitelist.
+</ParamField>
+
+## Response
+
+<ResponseField name="admin_wallet" type="string">
+  The managed admin wallet address. Use this as the target for `transferAdmin` in your on-chain transaction.
+</ResponseField>
+
+<ResponseField name="admin_key_idx" type="number">
+  Internal key index for the admin wallet
+</ResponseField>
+
+<ResponseField name="dao_id" type="number">
+  The DAO's ID. Pass this to `POST /dao/finalize-reserved` after on-chain confirmation.
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "admin_wallet": "AdminWallet1xgp...ABC",
+  "admin_key_idx": 5,
+  "dao_id": 42
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Missing Fields">
+    ```json
+    {
+      "error": "Missing required fields: name, token_mint, pool_address, pool_type, quote_mint, treasury_cosigner, owner_wallet"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Name Too Long">
+    ```json
+    {
+      "error": "DAO name must be 32 characters or less"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Pool Type">
+    ```json
+    {
+      "error": "pool_type must be \"damm\" or \"dlmm\""
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Address">
+    ```json
+    {
+      "error": "Invalid token_mint address"
+    }
+    ```
+    Also returned for invalid `pool_address`, `quote_mint`, `treasury_cosigner`, or `owner_wallet`.
+  </Accordion>
+
+  <Accordion title="403 - Invalid API Key">
+    ```json
+    {
+      "error": "Invalid API key"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="409 - Name Taken">
+    ```json
+    {
+      "error": "DAO with this name already exists"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

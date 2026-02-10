@@ -200,10 +200,12 @@ result = response.json()
 
 After creating a proposal:
 
-1. **Trading Period**: Users can trade conditional tokens until `length_secs` elapses
-2. **Finalize**: Call [Finalize Proposal](/api-reference/proposals/finalize) to resolve the outcome
-3. **Redeem**: Call [Redeem Liquidity](/api-reference/proposals/redeem-liquidity) to withdraw liquidity
-4. **Deposit Back**: Call [Deposit Back](/api-reference/proposals/deposit-back) to return liquidity to Meteora
+1. **Trading Period** — users trade conditional tokens until `length_secs` elapses
+2. **Finalize** — resolve the outcome based on final market prices
+3. **Redeem Liquidity** — withdraw liquidity from the decision market pools
+4. **Deposit Back** — return liquidity to the Meteora pool
+
+Steps 2–4 are handled automatically by the Combinator monitor.
 
 ## Multi-Option Markets
 

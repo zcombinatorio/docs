@@ -101,6 +101,10 @@ result = response.json()
   Transaction signature of the SOL funding transaction for DAO creation fees
 </ParamField>
 
+<ParamField body="api_key" type="string">
+  Optional API key. If it matches the server's `DAO_RESERVE_API_KEY`, the DAO is created with visibility 3 (client test) instead of the default 0 (hidden).
+</ParamField>
+
 ## Response
 
 <ResponseField name="dao_pda" type="string">

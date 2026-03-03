@@ -1,0 +1,111 @@
+---
+title: "Events Stream (SSE)"
+description: "GET /events - Real-time monitor events via Server-Sent Events"
+---
+
+## Overview
+
+Streams real-time monitor events over Server-Sent Events (SSE).
+
+<Warning>
+This endpoint is served by the **Monitor API** at `https://api.percent.markets`, not by `https://api.zcombinator.io`.
+</Warning>
+
+## Base URL
+
+- Monitor API (correct): `https://api.percent.markets`
+- Z Combinator API (not this endpoint): `https://api.zcombinator.io`
+
+## Endpoint
+
+`GET /events`
+
+## Authentication
+
+No API key is required for `/events`. It is a public stream endpoint.
+
+<CodeGroup>
+
+```bash curl
+curl -N https://api.percent.markets/events
+```
+
+```javascript browser
+const source = new EventSource('https://api.percent.markets/events');
+
+source.addEventListener('CONNECTED', (e) => {
+  console.log('connected', JSON.parse(e.data));
+});
+
+source.addEventListener('COND_SWAP', (e) => {
+  console.log('trade', JSON.parse(e.data));
+});
+
+source.addEventListener('TWAP_UPDATE', (e) => {
+  console.log('twap', JSON.parse(e.data));
+});
+```
+
+```python requests
+import requests
+
+with requests.get('https://api.percent.markets/events', stream=True) as r:
+    for line in r.iter_lines(decode_unicode=True):
+        if line:
+            print(line)
+```
+
+</CodeGroup>
+
+## Event Types
+
+<ResponseField name="CONNECTED" type="event">
+  Sent immediately after connection. Includes a `clientId`.
+</ResponseField>
+
+<ResponseField name="PRICE_UPDATE" type="event">
+  Price update broadcast for tracked pools.
+</ResponseField>
+
+<ResponseField name="COND_SWAP" type="event">
+  Real-time conditional market swap event for a proposal pool.
+</ResponseField>
+
+<ResponseField name="TWAP_UPDATE" type="event">
+  TWAP snapshot update for one proposal across pools.
+</ResponseField>
+
+<ResponseField name="PROPOSAL_TRACKED" type="event">
+  Emitted when the monitor starts tracking a proposal.
+</ResponseField>
+
+<ResponseField name="PROPOSAL_REMOVED" type="event">
+  Emitted when a tracked proposal is removed (for example finalized).
+</ResponseField>
+
+<ResponseField name="REWARDS_DISTRIBUTED" type="event">
+  Emitted when rewards distribution completes.
+</ResponseField>
+
+## Example Frames
+
+```text
+event: CONNECTED
+data: {"clientId":"sse-12"}
+```
+
+```text
+event: COND_SWAP
+data: {"proposalPda":"Prop1xgp...ABC","poolPda":"Pool1xgp...JKL","market":0,"trader":"9WzD...","swapAToB":true,"amountIn":"1000000","amountOut":"42123","txSignature":"5J8Z...","volumeUsd":"31.42","timestamp":1772551241000,"tokenA":"So111...","tokenB":"Token..."}
+```
+
+```text
+event: TWAP_UPDATE
+data: {"proposalPda":"Prop1xgp...ABC","pools":[{"poolPda":"Pool1xgp...JKL","market":0,"twap":"123456789"}],"timestamp":1772551260000}
+```
+
+## Notes
+
+- The stream uses standard SSE framing: `event: <NAME>` and `data: <JSON>`.
+- The server sends keepalive comments periodically to keep idle connections open.
+- Reconnect logic should be implemented client-side for network interruptions.

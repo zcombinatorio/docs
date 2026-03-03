@@ -94,7 +94,8 @@
           {
             "group": "Monitor API (percent.markets)",
             "pages": [
-              "api-reference/monitor/proposal-trade-history"
+              "api-reference/monitor/proposal-trade-history",
+              "api-reference/monitor/events-sse"
             ]
           },
           {

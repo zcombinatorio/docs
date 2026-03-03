@@ -90,6 +90,18 @@
               "api-reference/trading/withdraw",
               "api-reference/trading/redeem"
             ]
+          },
+          {
+            "group": "Monitor API (percent.markets)",
+            "pages": [
+              "api-reference/monitor/proposal-trade-history"
+            ]
+          },
+          {
+            "group": "Agents API",
+            "pages": [
+              "api-reference/agents/launch-token"
+            ]
           }
         ]
       }

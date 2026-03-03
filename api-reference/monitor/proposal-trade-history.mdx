@@ -1,0 +1,197 @@
+---
+title: "Proposal Trade History"
+description: "GET /api/history/:pda/trades - Historical trades for a proposal (Monitor API)"
+---
+
+## Overview
+
+Returns historical trade events for a specific proposal PDA.
+
+<Warning>
+This endpoint is served by the **Monitor API** at `https://api.percent.markets`, not by `https://api.zcombinator.io`.
+</Warning>
+
+## Base URL
+
+- Monitor API (correct): `https://api.percent.markets`
+- Z Combinator API (not this endpoint): `https://api.zcombinator.io`
+
+## Endpoint
+
+`GET /api/history/:pda/trades`
+
+<CodeGroup>
+
+```bash curl
+curl "https://api.percent.markets/api/history/Prop1xgp...ABC/trades?limit=100"
+```
+
+```javascript fetch
+const proposalPda = 'Prop1xgp...ABC';
+const response = await fetch(
+  `https://api.percent.markets/api/history/${proposalPda}/trades?limit=100`
+);
+const data = await response.json();
+```
+
+```python requests
+import requests
+
+proposal_pda = "Prop1xgp...ABC"
+response = requests.get(
+    f"https://api.percent.markets/api/history/{proposal_pda}/trades",
+    params={"limit": 100}
+)
+data = response.json()
+```
+
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="pda" type="string" required>
+  Proposal PDA. Supports both standard proposal PDAs and legacy values like `legacy-{moderatorId}-{proposalId}`.
+</ParamField>
+
+## Query Parameters
+
+<ParamField query="from" type="string">
+  Optional ISO date-time lower bound (inclusive), for example `2026-03-01T00:00:00.000Z`.
+</ParamField>
+
+<ParamField query="to" type="string">
+  Optional ISO date-time upper bound (inclusive), for example `2026-03-03T23:59:59.999Z`.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Optional positive integer. Default is `100`.
+</ParamField>
+
+## Response
+
+<ResponseField name="proposalPda" type="string">
+  Proposal PDA returned by the API.
+</ResponseField>
+
+<ResponseField name="count" type="number">
+  Number of trade records returned.
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of trade records.
+</ResponseField>
+
+### Trade Record
+
+<ResponseField name="data[].id" type="number">
+  Internal event row ID.
+</ResponseField>
+
+<ResponseField name="data[].timestamp" type="string">
+  Trade timestamp in ISO format.
+</ResponseField>
+
+<ResponseField name="data[].poolPda" type="string">
+  Conditional market pool PDA where the trade happened.
+</ResponseField>
+
+<ResponseField name="data[].market" type="number">
+  Market index for the proposal option.
+</ResponseField>
+
+<ResponseField name="data[].trader" type="string">
+  Trader wallet address.
+</ResponseField>
+
+<ResponseField name="data[].swapAToB" type="boolean">
+  Trade direction flag from pool swap event.
+</ResponseField>
+
+<ResponseField name="data[].amountIn" type="string">
+  Raw amount in (base units).
+</ResponseField>
+
+<ResponseField name="data[].amountOut" type="string">
+  Raw amount out (base units).
+</ResponseField>
+
+<ResponseField name="data[].txSignature" type="string">
+  Solana transaction signature.
+</ResponseField>
+
+<ResponseField name="data[].volumeUsd" type="string">
+  USD volume estimate for the trade.
+</ResponseField>
+
+<ResponseField name="data[].tokenA" type="string">
+  Token A mint address.
+</ResponseField>
+
+<ResponseField name="data[].tokenB" type="string">
+  Token B mint address.
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "proposalPda": "Prop1xgp...ABC",
+  "count": 2,
+  "data": [
+    {
+      "id": 1245,
+      "timestamp": "2026-03-03T15:20:41.000Z",
+      "poolPda": "Pool1xgp...JKL",
+      "market": 0,
+      "trader": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+      "swapAToB": true,
+      "amountIn": "1000000000",
+      "amountOut": "1483200",
+      "txSignature": "5J8Z9xKqH4nL2pR7vT3mB1cW6dF8yG4aS9jK2xM5nP8hQ3rV7wE1",
+      "volumeUsd": "31.42",
+      "tokenA": "So11111111111111111111111111111111111111112",
+      "tokenB": "Token1xgp...GHI"
+    },
+    {
+      "id": 1246,
+      "timestamp": "2026-03-03T15:22:09.000Z",
+      "poolPda": "Pool2xgp...MNO",
+      "market": 1,
+      "trader": "4L8fXk8c3C6vLx9KRuR9BxzWWo3uX7z8L2VfVm7mD2tQ",
+      "swapAToB": false,
+      "amountIn": "2500000",
+      "amountOut": "820000000",
+      "txSignature": "3Q4M9mXvJr2uL8yA6dK1rN5tP7wS2fH9bC6eZ4nR1pT8uV3qW5xY",
+      "volumeUsd": "79.18",
+      "tokenA": "Token1xgp...GHI",
+      "tokenB": "So11111111111111111111111111111111111111112"
+    }
+  ]
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="400 - Invalid PDA or Query Parameters">
+    ```json
+    {
+      "error": "Invalid proposal PDA"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid limit">
+    ```json
+    {
+      "error": "Invalid limit - must be a positive number"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Notes
+
+- This route is public and does not require an API key.
+- If `from` and `to` are omitted, the API returns recent trades up to the `limit`.
+- For related endpoints on the same host, see `GET /api/history/:pda/twap` and `GET /api/history/:pda/volume`.

@@ -1,0 +1,187 @@
+---
+title: "Launch Token"
+description: "POST /dbc-launch - Launch a new token on the Combinator bonding curve"
+---
+
+## Overview
+
+Launches a new SPL token on the Combinator Dynamic Bonding Curve (DBC). The token is created with a pumpfun-like bonding curve paired with SOL, and migrates to a Meteora DAMM V2 pool upon reaching the graduation threshold.
+
+**Curve parameters:**
+- **Starting mcap:** ~30 SOL
+- **Migration FDV:** ~400 SOL
+- **SOL raised at migration:** ~170 SOL (2x pumpfun liquidity ratio)
+- **Token supply:** 1B (6 decimals)
+- **Trading fee:** 1%
+- **Post-migration pool fee:** 1%
+
+The token mint authority is retained by the protocol, allowing additional tokens to be minted after launch.
+
+<CodeGroup>
+
+```bash curl
+curl -X POST https://api.zcombinator.io/dbc-launch \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "name": "MyToken",
+    "symbol": "MTK",
+    "uri": "https://arweave.net/abc123",
+    "recipientWallet": "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+  }'
+```
+
+```javascript fetch
+const response = await fetch('https://api.zcombinator.io/dbc-launch', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    name: 'MyToken',
+    symbol: 'MTK',
+    uri: 'https://arweave.net/abc123',
+    recipientWallet: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'
+  })
+});
+
+const result = await response.json();
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    'https://api.zcombinator.io/dbc-launch',
+    json={
+        'name': 'MyToken',
+        'symbol': 'MTK',
+        'uri': 'https://arweave.net/abc123',
+        'recipientWallet': '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM'
+    },
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    }
+)
+
+result = response.json()
+```
+
+</CodeGroup>
+
+## Authentication
+
+This endpoint requires an API key passed in the `x-api-key` header. Contact the team to obtain an API key.
+
+## Request Parameters
+
+<ParamField body="name" type="string" required>
+  Token name (e.g. "MyToken")
+</ParamField>
+
+<ParamField body="symbol" type="string" required>
+  Token ticker symbol (e.g. "MTK")
+</ParamField>
+
+<ParamField body="uri" type="string">
+  Pre-built metadata URI pointing to a JSON file following the Metaplex token metadata standard. Required if `image` is not provided.
+</ParamField>
+
+<ParamField body="image" type="string">
+  Image URL to embed in token metadata. The server will build and upload the metadata JSON to IPFS via Pinata. Required if `uri` is not provided.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Token description for metadata. Only used when `image` is provided (ignored if `uri` is set).
+</ParamField>
+
+<ParamField body="recipientWallet" type="string">
+  Solana wallet address to receive 100M minted tokens upon launch. If omitted, no additional tokens are minted beyond the 1B curve supply.
+</ParamField>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Whether the launch was successful
+</ResponseField>
+
+<ResponseField name="tokenMint" type="string">
+  The new token's mint address
+</ResponseField>
+
+<ResponseField name="config" type="string">
+  The DBC config address used for the launch
+</ResponseField>
+
+<ResponseField name="signature" type="string">
+  Transaction signature for the pool creation
+</ResponseField>
+
+<ResponseField name="mintSignature" type="string">
+  Transaction signature for the token mint to recipient (only present if `recipientWallet` was provided)
+</ResponseField>
+
+<ResponseField name="metadataUrl" type="string">
+  The metadata URI used for the token
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "tokenMint": "26eE3MPm72s7qUo8ynZsvfpWPTyJMToxZiFyWMRBrbJw",
+  "config": "5qQDkwGzMAeiAeX8SR7kj6BTyGQRSuZcWva591CrydDj",
+  "signature": "3KensLoQsCDgMTWvjmbRCemDZgqPtm9cwHtnyq8oyuPZ...",
+  "mintSignature": "65C9gB4wzG567TywapdVD8k18yj2HMbp15FeiywwgS3S...",
+  "metadataUrl": "https://arweave.net/abc123"
+}
+```
+
+## Error Responses
+
+<AccordionGroup>
+  <Accordion title="401 - Invalid API Key">
+    ```json
+    {
+      "error": "Invalid or missing API key"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Missing Required Fields">
+    ```json
+    {
+      "error": "name and symbol are required"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Missing Metadata">
+    ```json
+    {
+      "error": "uri or image is required"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="400 - Invalid Recipient">
+    ```json
+    {
+      "error": "Invalid recipientWallet address"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="429 - Rate Limited">
+    ```json
+    {
+      "error": "Too many launch requests, please try again later."
+    }
+    ```
+
+    Limited to 10 requests per 5 minutes per IP.
+  </Accordion>
+</AccordionGroup>

@@ -79,7 +79,7 @@
             ]
           },
           {
-            "group": "Trading API",
+            "group": "Execution API",
             "pages": [
               "api-reference/trading/overview",
               "api-reference/trading/market-status",

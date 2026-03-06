@@ -8,12 +8,12 @@ description: "GET /events - Real-time monitor events via Server-Sent Events"
 Streams real-time monitor events over Server-Sent Events (SSE).
 
 <Warning>
-This endpoint is served by the **Monitor API** at `https://api.percent.markets`, not by `https://api.zcombinator.io`.
+This endpoint is served by the **Monitor API** at `https://api.percent.markets/cmb`, not by `https://api.zcombinator.io`.
 </Warning>
 
 ## Base URL
 
-- Monitor API (correct): `https://api.percent.markets`
+- Monitor API (correct): `https://api.percent.markets/cmb`
 - Z Combinator API (not this endpoint): `https://api.zcombinator.io`
 
 ## Endpoint
@@ -27,11 +27,11 @@ No API key is required for `/events`. It is a public stream endpoint.
 <CodeGroup>
 
 ```bash curl
-curl -N https://api.percent.markets/events
+curl -N https://api.percent.markets/cmb/events
 ```
 
 ```javascript browser
-const source = new EventSource('https://api.percent.markets/events');
+const source = new EventSource('https://api.percent.markets/cmb/events');
 
 source.addEventListener('CONNECTED', (e) => {
   console.log('connected', JSON.parse(e.data));
@@ -49,7 +49,7 @@ source.addEventListener('TWAP_UPDATE', (e) => {
 ```python requests
 import requests
 
-with requests.get('https://api.percent.markets/events', stream=True) as r:
+with requests.get('https://api.percent.markets/cmb/events', stream=True) as r:
     for line in r.iter_lines(decode_unicode=True):
         if line:
             print(line)

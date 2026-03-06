@@ -8,12 +8,12 @@ description: "GET /api/history/:pda/trades - Historical trades for a proposal (M
 Returns historical trade events for a specific proposal PDA.
 
 <Warning>
-This endpoint is served by the **Monitor API** at `https://api.percent.markets`, not by `https://api.zcombinator.io`.
+This endpoint is served by the **Monitor API** at `https://api.percent.markets/cmb`, not by `https://api.zcombinator.io`.
 </Warning>
 
 ## Base URL
 
-- Monitor API (correct): `https://api.percent.markets`
+- Monitor API (correct): `https://api.percent.markets/cmb`
 - Z Combinator API (not this endpoint): `https://api.zcombinator.io`
 
 ## Endpoint
@@ -23,13 +23,13 @@ This endpoint is served by the **Monitor API** at `https://api.percent.markets`,
 <CodeGroup>
 
 ```bash curl
-curl "https://api.percent.markets/api/history/Prop1xgp...ABC/trades?limit=100"
+curl "https://api.percent.markets/cmb/api/history/Prop1xgp...ABC/trades?limit=100"
 ```
 
 ```javascript fetch
 const proposalPda = 'Prop1xgp...ABC';
 const response = await fetch(
-  `https://api.percent.markets/api/history/${proposalPda}/trades?limit=100`
+  `https://api.percent.markets/cmb/api/history/${proposalPda}/trades?limit=100`
 );
 const data = await response.json();
 ```
@@ -39,7 +39,7 @@ import requests
 
 proposal_pda = "Prop1xgp...ABC"
 response = requests.get(
-    f"https://api.percent.markets/api/history/{proposal_pda}/trades",
+    f"https://api.percent.markets/cmb/api/history/{proposal_pda}/trades",
     params={"limit": 100}
 )
 data = response.json()

@@ -1,6 +1,6 @@
 ---
 title: "Quickstart"
-description: "Go from zero to a working DAO with futarchy proposals in minutes"
+description: "Go from zero to a working DAO with decision market proposals in minutes"
 ---
 
 ## Prerequisites
@@ -56,7 +56,7 @@ API_URL=https://api.zcombinator.io DAO_PDA="<from-step-2>" \
   pnpm tsx scripts/test-dao-proposal.ts
 ```
 
-That's it. You have a DAO with a live futarchy proposal.
+That's it. You have a DAO with a live decision market proposal.
 
 ---
 
@@ -93,11 +93,11 @@ Use the **exact** `MINT_VAULT` address from step 2. Do not derive or modify this
 
 ### Step 4: Transfer LP Position
 
-[`e2e-transfer-lp.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/e2e-transfer-lp.ts) transfers your DAMM LP position NFT to the DAO's `ADMIN_WALLET`. This gives the DAO control over the liquidity used to seed futarchy markets.
+[`e2e-transfer-lp.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/e2e-transfer-lp.ts) transfers your DAMM LP position NFT to the DAO's `ADMIN_WALLET`. This gives the DAO control over the liquidity used to seed decision markets.
 
 ### Step 5: Create a Proposal
 
-[`test-dao-proposal.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/test-dao-proposal.ts) calls [`POST /dao/proposal`](/api-reference/proposals/create) to create a futarchy proposal. The DAO temporarily withdraws liquidity from the pool to seed the prediction markets.
+[`test-dao-proposal.ts`](https://github.com/zcombinatorio/combinator/blob/main/ui/scripts/test-dao-proposal.ts) calls [`POST /dao/proposal`](/api-reference/proposals/create) to create a decision market proposal. The DAO temporarily withdraws liquidity from the pool to seed the prediction markets.
 
 ---
 

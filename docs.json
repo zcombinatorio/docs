@@ -24,7 +24,6 @@
           {
             "group": "Protocol",
             "pages": [
-              "staking",
               "addresses"
             ]
           }

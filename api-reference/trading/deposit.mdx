@@ -11,7 +11,7 @@ Deposit (split) regular tokens into conditional tokens to participate in decisio
 1 regular token → 1 conditional token per outcome
 ```
 
-For example, depositing 100 ZC into a proposal with 2 outcomes gives you 100 conditional tokens for each outcome.
+For example, depositing 100 base tokens into a proposal with 2 outcomes gives you 100 conditional tokens for each outcome.
 
 This is a two-step process:
 1. **Build** - Request an unsigned transaction from the API
@@ -300,7 +300,7 @@ async function depositTokens(proposalPda, wallet, vaultType, amount, signTransac
 
 | Type | Token | Use Case |
 |------|-------|----------|
-| `base` | DAO's native token (e.g., ZC) | Trading the base asset |
+| `base` | DAO's native token | Trading the base asset |
 | `quote` | Quote currency (e.g., SOL) | Trading the quote asset |
 
 ---
@@ -311,13 +311,13 @@ After depositing, you can trade your conditional tokens to take a position:
 
 ```javascript
 // Example with a binary (2 outcome) proposal:
-// 1. Deposit 100 ZC to get 100 tokens for each outcome
+// 1. Deposit 100 base tokens to get 100 tokens for each outcome
 await depositTokens(proposalPda, wallet, 'base', '100000000000', signTransaction);
 
 // 2. Swap outcome-1 tokens for outcome-0 tokens
 // Now you have ~200 outcome-0 tokens and 0 outcome-1 tokens
 
-// 3. If outcome 0 wins, redeem for ~200 ZC
+// 3. If outcome 0 wins, redeem for ~200 base tokens
 // Net profit if outcome-0 price was < 0.5
 ```
 

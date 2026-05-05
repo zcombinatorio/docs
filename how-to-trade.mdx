@@ -7,41 +7,41 @@ This section explains how to trade decision markets on Combinator.
 
 ## Getting Started
 
-Each user gets a client-side wallet to execute trades and hold positions with. Once you log in, you should be able to access your wallet in the top-right of the header. From there, you can either add funds by sending your desired token to the address.
+Each user gets a client-side wallet to execute trades and hold positions with. Once you log in, you should be able to access your wallet in the top-right of the header. From there, you can add funds by sending the asset you want to trade to the address.
 
 ## Enter a Market
 
-In order to participate in a decision market, you need to enter a market with either SOL or the target token. In this walkthrough, we will give examples using `$ZC`, Combinator's native token, and `$SOL`.
+In order to participate in a decision market, you need to enter a market with either SOL or the market's base asset. In this walkthrough, we will use `BASE` and `SOL` as examples.
 
-- Entering a market with 100 `ZC` splits your token into 100 `pass-ZC` and 100 `fail-ZC`
-- Entering a market with 2 `SOL` splits your token into 2 `pass-SOL` and 2 `fail-SOL`
+- Entering a market with 100 `BASE` splits your asset into 100 `pass-BASE` and 100 `fail-BASE`
+- Entering a market with 2 `SOL` splits your asset into 2 `pass-SOL` and 2 `fail-SOL`
 
 ## Trading
 
 The Combinator frontend allows you to first choose whether you'd like to bet on the pass market or the fail market.
 
-The **pass market** represents the price of `$ZC` if a proposal passes. The **fail market** represents the price of `$ZC` if a proposal fails to pass.
+The **pass market** represents the price of the base asset if a proposal passes. The **fail market** represents the price of the base asset if a proposal fails to pass.
 
-Trading on the pass market allows you to exchange `pass-ZC` for `pass-SOL` and vice versa. This will only affect the pass market `$ZC` price.
+Trading on the pass market allows you to exchange `pass-BASE` for `pass-SOL` and vice versa. This only affects the pass market price.
 
-Trading on the fail market allows you to exchange `fail-ZC` for `fail-SOL` and vice versa. This will only affect the fail market `$ZC` price.
+Trading on the fail market allows you to exchange `fail-BASE` for `fail-SOL` and vice versa. This only affects the fail market price.
 
-This allows you to express your belief on what you think the price of `$ZC` should be if a `ZC`-related proposal passes or fails.
+This allows you to express your belief on what the base asset price should be if a proposal passes or fails.
 
 ## Exiting a Market
 
-If you have sufficient `ZC` or `SOL` on both the pass and fail markets, you're able to combine the tokens and exit the market.
+If you have sufficient `BASE` or `SOL` on both the pass and fail markets, you're able to combine the assets and exit the market.
 
 ### What does that mean?
 
-Let's say you have 100 `pass-ZC` and 80 `fail-ZC`. You're able to withdraw 80 `$ZC` from the market. Afterwards you will be left with 80 `$ZC` (in your privy wallet), 0 `pass-ZC` and 20 `fail-ZC`.
+Let's say you have 100 `pass-BASE` and 80 `fail-BASE`. You're able to withdraw 80 `BASE` from the market. Afterwards you will be left with 80 `BASE` in your wallet, 0 `pass-BASE`, and 20 `fail-BASE`.
 
 This also applies to `SOL`.
 
 ## Claiming
 
-After the decision market resolves, you will be able to claim tokens from the resolving market.
+After the decision market resolves, you will be able to claim assets from the resolving market.
 
-Let's say a proposal ended up failing and you have 50 `pass-ZC` and 75 `fail-ZC` as well as 2 `pass-SOL` and 1 `fail-SOL`.
+Let's say a proposal ended up failing and you have 50 `pass-BASE` and 75 `fail-BASE` as well as 2 `pass-SOL` and 1 `fail-SOL`.
 
-This means you will be able to claim 75 `ZC` and 1 `SOL` from the fail market. The pass market tokens are deemed worthless / non claimable.
+This means you will be able to claim 75 `BASE` and 1 `SOL` from the fail market. The pass market assets are deemed worthless / non claimable.

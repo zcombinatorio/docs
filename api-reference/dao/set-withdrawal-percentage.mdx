@@ -83,7 +83,7 @@ result = response.json()
 </ParamField>
 
 <ParamField body="percentage" type="number" required>
-  The withdrawal percentage (integer between 5 and 50)
+  The withdrawal percentage (integer between 1 and 99)
 </ParamField>
 
 ## Response
@@ -130,7 +130,7 @@ result = response.json()
     ```json
     {
       "error": "Invalid withdrawal percentage",
-      "details": "Percentage must be an integer between 5 and 50"
+      "details": "Percentage must be an integer between 1 and 99"
     }
     ```
   </Accordion>
@@ -161,7 +161,7 @@ When a decision market proposal is launched:
 3. After the proposal finalizes, liquidity is returned to the Meteora pool
 
 <Info>
-**Default:** 12%
+**Default:** 50%
 
 Higher percentages provide deeper liquidity for decision market trading but temporarily reduce main pool liquidity.
 </Info>
@@ -170,7 +170,7 @@ Higher percentages provide deeper liquidity for decision market trading but temp
 
 | Percentage | Use Case |
 | :--- | :--- |
-| 5-10% | Low-impact proposals, smaller pools |
-| 10-20% | Standard proposals, balanced approach |
-| 20-35% | High-stakes decisions, larger pools |
-| 35-50% | Maximum market depth, very large pools |
+| 1-15% | Low-impact proposals, smaller pools |
+| 15-40% | Standard proposals, balanced approach |
+| 40-70% | High-stakes decisions, larger pools |
+| 70-99% | Maximum market depth, very large pools |
